@@ -24,18 +24,36 @@ func (q *DnsQuestion) Read(buffer *BytePacketBuffer) error {
 	var err error
 	buffer.Read_qname(&q.name)
 
-	var result *uint16
+	var result uint16
 	if result, err = buffer.Read_u16(); err != nil {
 		return err
 	}
-	r_buffer := *result
+	r_buffer := result
 
 	q.qtype = QueryType.From_num(0, r_buffer)
 
 	if result, err = buffer.Read_u16(); err != nil {
 		return err
 	}
-	var _ = *result
+	var _ = result
+
+	return nil
+}
+
+// ################################## For Writing ###################################################
+
+func (d *DnsQuestion) Write(buffer *BytePacketBuffer) error {
+	if err := buffer.Write_qname(&d.name); err != nil {
+		return err
+	}
+
+	typenum := uint16(d.qtype)
+	if err := buffer.Write_u16(typenum); err != nil {
+		return err
+	}
+	if err := buffer.Write_u16(1); err != nil {
+		return err
+	}
 
 	return nil
 }

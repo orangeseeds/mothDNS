@@ -1,24 +1,24 @@
 package header
 
 import (
-	"fmt"
+// "fmt"
 )
 
 type DnsPacket struct {
 	Header      DnsHeader
-	questions   []DnsQuestion
-	answers     []DnsRecord
-	authorities []DnsRecord
-	resources   []DnsRecord
+	Questions   []DnsQuestion
+	Answers     []DnsRecord
+	Authorities []DnsRecord
+	Resources   []DnsRecord
 }
 
 func NewPacket() DnsPacket {
 	d := DnsPacket{
-		Header:      *new(DnsHeader),
-		questions:   []DnsQuestion{},
-		answers:     []DnsRecord{},
-		authorities: []DnsRecord{},
-		resources:   []DnsRecord{},
+		Header:      *NewHeader(),
+		Questions:   []DnsQuestion{},
+		Answers:     []DnsRecord{},
+		Authorities: []DnsRecord{},
+		Resources:   []DnsRecord{},
 	}
 
 	return d
@@ -31,9 +31,9 @@ func (d *DnsPacket) From_buffer(buffer *BytePacketBuffer) (*DnsPacket, error) {
 	if err = d.Header.Read(buffer); err != nil {
 		return nil, err
 	}
-	fmt.Println(d.Header)
+	// fmt.Println(d.Header)
 
-	fmt.Println("DNS Questions")
+	// fmt.Println("DNS Questions")
 	for i := 0; i < int(d.Header.questions); i++ {
 
 		question := NewQuestion("", qt_UNKNOWN)
@@ -41,41 +41,85 @@ func (d *DnsPacket) From_buffer(buffer *BytePacketBuffer) (*DnsPacket, error) {
 			return nil, err
 		}
 
-		d.questions = append(d.questions, question)
-		fmt.Println(buffer.pos)
+		d.Questions = append(d.Questions, question)
+		// fmt.Println(buffer.pos)
 	}
-	fmt.Println(d.questions)
+	// fmt.Println(d.Questions)
 	//
+	// fmt.Println("DNS Answers")
 	for i := 0; i < int(d.Header.answers); i++ {
 
 		var p_rec *DnsRecord
 		if p_rec, err = eDnsRecord.Read(buffer); err != nil {
 			return nil, err
 		}
-		d.answers = append(d.answers, *p_rec)
-		fmt.Println(buffer.pos)
+		d.Answers = append(d.Answers, *p_rec)
 	}
-	fmt.Println(d.answers)
+	// fmt.Println(d.Answers)
 	//
-	// for i := 0; i < int(d.Header.authoritative_entries); i++ {
+	for i := 0; i < int(d.Header.authoritative_entries); i++ {
+
+		var p_rec *DnsRecord
+		if p_rec, err = eDnsRecord.Read(buffer); err != nil {
+			return nil, err
+		}
+		var rec = *p_rec
+		d.Authorities = append(d.Authorities, rec)
+	}
 	//
-	// 	var p_rec *DnsRecord
-	// 	if p_rec, err = eDnsRecord.Read(*buffer); err != nil {
-	// 		return nil, err
-	// 	}
-	// 	var rec = *p_rec
-	// 	d.authorities = append(d.authorities, rec)
-	// }
-	//
-	// for i := 0; i < int(d.Header.resource_entries); i++ {
-	//
-	// 	var p_rec *DnsRecord
-	// 	if p_rec, err = eDnsRecord.Read(*buffer); err != nil {
-	// 		return nil, err
-	// 	}
-	// 	var rec = *p_rec
-	// 	d.resources = append(d.resources, rec)
-	// }
+	for i := 0; i < int(d.Header.resource_entries); i++ {
+
+		var p_rec *DnsRecord
+		if p_rec, err = eDnsRecord.Read(buffer); err != nil {
+			return nil, err
+		}
+		var rec = *p_rec
+		d.Resources = append(d.Resources, rec)
+	}
 
 	return d, nil
+}
+
+// ################################## For Writing ###################################################
+
+func (d *DnsPacket) Write(buffer *BytePacketBuffer) error {
+
+	// if err := buffer.Write_u16(d.id); err != nil {
+	// 	return err
+	// }
+
+	d.Header.questions = uint16(len(d.Questions))
+	d.Header.answers = uint16(len(d.Answers))
+	d.Header.authoritative_entries = uint16(len(d.Authorities))
+	d.Header.resource_entries = uint16(len(d.Resources))
+
+	if err := d.Header.Write(buffer); err != nil {
+		return err
+	}
+
+	for _, question := range d.Questions {
+		if err := question.Write(buffer); err != nil {
+			return err
+		}
+	}
+
+	for _, rec := range d.Answers {
+		if _, err := rec.Write(buffer); err != nil {
+			return err
+		}
+	}
+
+	for _, rec := range d.Authorities {
+		if _, err := rec.Write(buffer); err != nil {
+			return err
+		}
+	}
+
+	for _, rec := range d.Resources {
+		if _, err := rec.Write(buffer); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
