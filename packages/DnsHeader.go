@@ -9,21 +9,21 @@ import (
 var EOBError = errors.New("Buffer greater than or equals 512")
 
 type DnsHeader struct {
-	id                    uint16     // 16 bits
-	recursion_desired     bool       // 1 bit
-	truncated_message     bool       // 1 bit
-	authoritative_answer  bool       // 1 bit
-	opcode                byte       // 4 bits
-	response              bool       // 1 bit
-	rescode               ResultCode // 4 bits
-	checking_disabled     bool       // 1 bit
-	authed_data           bool       // 1 bit
-	z                     bool       // 1 bit
-	recursion_available   bool       // 1 bit
-	questions             uint16     // 16 bits
-	answers               uint16     // 16 bits
-	authoritative_entries uint16     // 16 bits
-	resource_entries      uint16     // 16 bits
+	Id                    uint16     // 16 bits
+	Recursion_desired     bool       // 1 bit
+	Truncated_message     bool       // 1 bit
+	Authoritative_answer  bool       // 1 bit
+	Opcode                byte       // 4 bits
+	Response              bool       // 1 bit
+	Rescode               ResultCode // 4 bits
+	Checking_disabled     bool       // 1 bit
+	Authed_data           bool       // 1 bit
+	Z                     bool       // 1 bit
+	Recursion_available   bool       // 1 bit
+	Questions             uint16     // 16 bits
+	Answers               uint16     // 16 bits
+	Authoritative_entries uint16     // 16 bits
+	Resource_entries      uint16     // 16 bits
 }
 
 func NewHeader() *DnsHeader {
@@ -32,23 +32,23 @@ func NewHeader() *DnsHeader {
 	rCode = NOERROR
 
 	d := DnsHeader{
-		id:                    0,
-		recursion_desired:     false,
-		truncated_message:     false,
-		authoritative_answer:  false,
-		opcode:                0,
-		response:              false,
-		rescode:               rCode,
-		checking_disabled:     false,
-		authed_data:           false,
-		z:                     false,
-		recursion_available:   false,
-		questions:             0,
-		answers:               0,
-		authoritative_entries: 0,
-		resource_entries:      0,
+		Id:                    0,
+		Recursion_desired:     false,
+		Truncated_message:     false,
+		Authoritative_answer:  false,
+		Opcode:                0,
+		Response:              false,
+		Rescode:               rCode,
+		Checking_disabled:     false,
+		Authed_data:           false,
+		Z:                     false,
+		Recursion_available:   false,
+		Questions:             0,
+		Answers:               0,
+		Authoritative_entries: 0,
+		Resource_entries:      0,
 	}
-	// fmt.Println("rescode---------------", d.rescode)
+	// fmt.Println("Rescode---------------", d.Rescode)
 	return &d
 }
 
@@ -60,7 +60,7 @@ func (d *DnsHeader) Read(buffer *BytePacketBuffer) error {
 	if byte2, err = buffer.Read_u16(); err != nil {
 		return err
 	}
-	d.id = byte2
+	d.Id = byte2
 
 	if byte2, err = buffer.Read_u16(); err != nil {
 		return err
@@ -70,37 +70,37 @@ func (d *DnsHeader) Read(buffer *BytePacketBuffer) error {
 	a := uint8((flags >> 8))
 	b := uint8((flags & 0xFF))
 
-	d.recursion_desired = (a & (1 << 0)) > 0
-	d.truncated_message = (a & (1 << 1)) > 0
-	d.authoritative_answer = (a & (1 << 2)) > 0
-	d.opcode = (a >> 3) & 0x0F
-	d.response = (a & (1 << 7)) > 0
+	d.Recursion_desired = (a & (1 << 0)) > 0
+	d.Truncated_message = (a & (1 << 1)) > 0
+	d.Authoritative_answer = (a & (1 << 2)) > 0
+	d.Opcode = (a >> 3) & 0x0F
+	d.Response = (a & (1 << 7)) > 0
 
-	d.rescode = ResultCode.From_num(0, b&0x0F)
-	d.checking_disabled = (b & (1 << 4)) > 0
-	d.authed_data = (b & (1 << 5)) > 0
-	d.z = (b & (1 << 6)) > 0
-	d.recursion_available = (b & (1 << 7)) > 0
-
-	if byte2, err = buffer.Read_u16(); err != nil {
-		return err
-	}
-	d.questions = byte2
+	d.Rescode = ResultCode.From_num(0, b&0x0F)
+	d.Checking_disabled = (b & (1 << 4)) > 0
+	d.Authed_data = (b & (1 << 5)) > 0
+	d.Z = (b & (1 << 6)) > 0
+	d.Recursion_available = (b & (1 << 7)) > 0
 
 	if byte2, err = buffer.Read_u16(); err != nil {
 		return err
 	}
-	d.answers = byte2
+	d.Questions = byte2
 
 	if byte2, err = buffer.Read_u16(); err != nil {
 		return err
 	}
-	d.authoritative_entries = byte2
+	d.Answers = byte2
 
 	if byte2, err = buffer.Read_u16(); err != nil {
 		return err
 	}
-	d.resource_entries = byte2
+	d.Authoritative_entries = byte2
+
+	if byte2, err = buffer.Read_u16(); err != nil {
+		return err
+	}
+	d.Resource_entries = byte2
 
 	return nil
 }
@@ -118,40 +118,40 @@ func To_uint8(v bool) uint8 {
 
 func (d *DnsHeader) Write(buffer *BytePacketBuffer) error {
 
-	if err := buffer.Write_u16(d.id); err != nil {
+	if err := buffer.Write_u16(d.Id); err != nil {
 		return err
 	}
 
-	v1 := To_uint8(d.recursion_desired)
-	v2 := (To_uint8(d.truncated_message) << 1)
-	v3 := (To_uint8(d.authoritative_answer) << 2)
-	v4 := (d.opcode << 3)
-	v5 := uint8(To_uint8(d.response) << 7)
-
-	if err := buffer.Write_u8(v1 | v2 | v3 | v4 | v5); err != nil {
-		return err
-	}
-
-	v1 = uint8(d.rescode)
-	v2 = To_uint8(d.checking_disabled) << 4
-	v3 = To_uint8(d.authed_data) << 5
-	v4 = To_uint8(d.z) << 6
-	v5 = To_uint8(d.recursion_available) << 7
+	v1 := To_uint8(d.Recursion_desired)
+	v2 := (To_uint8(d.Truncated_message) << 1)
+	v3 := (To_uint8(d.Authoritative_answer) << 2)
+	v4 := (d.Opcode << 3)
+	v5 := uint8(To_uint8(d.Response) << 7)
 
 	if err := buffer.Write_u8(v1 | v2 | v3 | v4 | v5); err != nil {
 		return err
 	}
 
-	if err := buffer.Write_u16(d.questions); err != nil {
+	v1 = uint8(d.Rescode)
+	v2 = To_uint8(d.Checking_disabled) << 4
+	v3 = To_uint8(d.Authed_data) << 5
+	v4 = To_uint8(d.Z) << 6
+	v5 = To_uint8(d.Recursion_available) << 7
+
+	if err := buffer.Write_u8(v1 | v2 | v3 | v4 | v5); err != nil {
 		return err
 	}
-	if err := buffer.Write_u16(d.answers); err != nil {
+
+	if err := buffer.Write_u16(d.Questions); err != nil {
 		return err
 	}
-	if err := buffer.Write_u16(d.authoritative_entries); err != nil {
+	if err := buffer.Write_u16(d.Answers); err != nil {
 		return err
 	}
-	if err := buffer.Write_u16(d.resource_entries); err != nil {
+	if err := buffer.Write_u16(d.Authoritative_entries); err != nil {
+		return err
+	}
+	if err := buffer.Write_u16(d.Resource_entries); err != nil {
 		return err
 	}
 

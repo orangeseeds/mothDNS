@@ -248,3 +248,24 @@ func (b *BytePacketBuffer) Write_qname(q_name *string) error {
 
 	return nil
 }
+
+// ################################## For Setting ###################################################
+
+func (b *BytePacketBuffer) Set(pos uint, val uint8) error {
+	b.Buf[pos] = val
+
+	return nil
+}
+
+func (b *BytePacketBuffer) Set_u16(pos uint, val uint16) error {
+
+	if err := b.Set(pos, uint8(val>>8)); err != nil {
+		return err
+	}
+
+	if err := b.Set(pos+1, uint8(val&0xFF)); err != nil {
+		return err
+	}
+
+	return nil
+}
