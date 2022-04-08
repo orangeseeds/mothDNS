@@ -1,4 +1,4 @@
-package header
+package core
 
 import (
 	"errors"
@@ -38,9 +38,7 @@ func (b *BytePacketBuffer) Read() (uint8, error) {
 		return 0, EOBError
 	}
 	cur_byte := b.Buf[b.pos]
-	// fmt.Println("before read", b.pos)
 	b.pos += 1
-	// fmt.Println("after read", b.pos)
 
 	return cur_byte, nil
 }
@@ -68,11 +66,7 @@ func (b *BytePacketBuffer) Read_u16() (uint16, error) {
 		return 0, EOBError
 	}
 
-	// fmt.Println(*byte1)
-	// fmt.Println(*byte2)
-
 	two_bytes := (uint16(byte1) << 8) | (uint16(byte2))
-	// fmt.Println(two_bytes)
 	return two_bytes, nil
 }
 
@@ -94,9 +88,6 @@ func (b *BytePacketBuffer) Read_qname(outstr *string) error {
 
 	var err error
 	var pos = b.Pos()
-	// fmt.Println("position top---", b.pos)
-	// var set_pos = pos
-	// b.Read()
 
 	jumped := false
 	max_jumps := 5
@@ -113,12 +104,9 @@ func (b *BytePacketBuffer) Read_qname(outstr *string) error {
 		if len, err = b.Get(pos); err != nil {
 			return err
 		}
-		// fmt.Println("get-len---", len)
-		// fmt.Println("satis---", (len&0xC0) == 0xC0)
 		if (len & 0xC0) == 0xC0 {
 
 			if !jumped {
-				// newV = pos
 				b.Seek(pos + 2)
 			}
 
@@ -130,24 +118,17 @@ func (b *BytePacketBuffer) Read_qname(outstr *string) error {
 
 			offset := ((uint16(len) ^ 0xC0) << 8) | b2
 			pos = uint(offset)
-			// fmt.Println("offset----", set_pos)
 
 			jumped = true
 			jumps_performed += 1
 			continue
 		} else {
-			// fmt.Println("position b", pos)
 			pos = pos + 1
-			// fmt.Println("position a", pos)
 
 			if len == 0 {
 				break
 			}
 
-			// fmt.Println("<<<<<<<>>>>>>>")
-			// fmt.Println("len---", uint(len))
-			// fmt.Println("position---", pos)
-			// fmt.Println("b.position---", b.pos)
 			*outstr = fmt.Sprintf("%s%s", *outstr, delim)
 
 			var str_buffer []uint8
@@ -156,17 +137,13 @@ func (b *BytePacketBuffer) Read_qname(outstr *string) error {
 				return err
 			}
 
-			// fmt.Println("Outstr> ", strings.ToLower(string(str_buffer)))
-
 			*outstr = fmt.Sprintf("%s%s", *outstr, strings.ToLower(string(str_buffer)))
 
 			delim = "."
 
 			pos = pos + uint(len)
 		}
-		// fmt.Println("Finished-------------------------------")
 	}
-	// fmt.Println("out", *outstr)
 
 	if !jumped {
 		b.Seek(pos)
