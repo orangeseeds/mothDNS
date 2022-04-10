@@ -1,10 +1,11 @@
 package server
 
 import (
-	"DNSserver/core"
-	"DNSserver/utils"
 	"log"
 	"net"
+
+	"github.com/orangeseeds/DNSserver/core"
+	"github.com/orangeseeds/DNSserver/utils"
 )
 
 func HandleConnection(socket net.PacketConn, addr net.Addr, buf []byte) {

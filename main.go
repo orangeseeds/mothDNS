@@ -3,10 +3,11 @@ package main
 // TODO: Write REcord Config for IPv6 for AAAA query type
 
 import (
-	"DNSserver/core"
-	"DNSserver/server"
-	"DNSserver/utils"
 	"fmt"
+
+	"github.com/orangeseeds/DNSserver/core"
+	"github.com/orangeseeds/DNSserver/server"
+	"github.com/orangeseeds/DNSserver/utils"
 	// "reflect"
 )
 

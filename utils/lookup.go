@@ -1,9 +1,10 @@
 package utils
 
 import (
-	"DNSserver/core"
 	"log"
 	"net"
+
+	"github.com/orangeseeds/DNSserver/core"
 )
 
 func ConstrPacket(id uint16, isRec bool, nameQtypes map[string]core.QueryType) core.DnsPacket {
