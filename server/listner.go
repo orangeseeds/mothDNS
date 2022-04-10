@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"fmt"
@@ -18,6 +18,7 @@ func (s *UPDServer) Serve(port string) *UPDServer {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	log.Println("Listening on port:" + port + "...")
 	defer socket.Close()
 
 	for {
@@ -37,15 +38,14 @@ func (s *UPDServer) SetHandler(f func(net.PacketConn, net.Addr, []byte)) {
 }
 
 func serve(socket net.PacketConn, addr net.Addr, buf []byte) {
-
 	message := "Heyy there! Client..."
 	fmt.Println("Something just hit me!!", string(buf))
 
 	socket.WriteTo([]byte(message), addr)
 }
 
-func main() {
-	server := new(UPDServer)
-	server.SetHandler(serve)
-	server.Serve("1053")
-}
+// func main() {
+// 	server := new(UPDServer)
+// 	server.SetHandler(serve)
+// 	server.Serve("1053")
+// }

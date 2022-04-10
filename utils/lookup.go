@@ -2,6 +2,7 @@ package utils
 
 import (
 	"DNSserver/core"
+	"log"
 	"net"
 )
 
@@ -32,12 +33,13 @@ func BufToPacket(b core.BytePacketBuffer) (*core.DnsPacket, error) {
 	return &packet, nil
 }
 
-func lookup(nameQtypes map[string]core.QueryType, id uint16, serverType string, host string, port string) (*core.DnsPacket, error) {
+func Lookup(nameQtypes map[string]core.QueryType, id uint16, serverType string, host string, port string) (*core.DnsPacket, error) {
 	socket, err := net.Dial(serverType, host+":"+port)
 	if err != nil {
 		return nil, err
 	}
 	defer socket.Close()
+	log.Printf("Looking up Ip addresses from %v", host)
 
 	packet := ConstrPacket(id, true, nameQtypes)
 	buffer := PacketToBuf(packet)
@@ -61,4 +63,14 @@ func lookup(nameQtypes map[string]core.QueryType, id uint16, serverType string, 
 	}
 
 	return replyPacket, nil
+}
+
+func CheckQuestions(questions []core.DnsQuestion) bool {
+	for _, question := range questions {
+		if question.Name == "127.0.0.1" {
+			log.Printf("Question asking for %v, is not a valid question.", question.Name)
+			return false
+		}
+	}
+	return true
 }
