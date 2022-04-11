@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"log"
 	"net"
 
@@ -10,6 +11,7 @@ import (
 func ConstrPacket(id uint16, isRec bool, nameQtypes map[string]core.QueryType) core.DnsPacket {
 	packet := core.NewPacket()
 	packet.Header.Id = id
+	packet.Header.Recursion_desired = isRec
 
 	for name, qtype := range nameQtypes {
 		packet.Questions = append(packet.Questions, core.NewQuestion(name, qtype))
@@ -24,14 +26,12 @@ func Lookup(nameQtypes map[string]core.QueryType, id uint16, serverType string, 
 		return nil, err
 	}
 	defer socket.Close()
-	log.Printf("Looking up Ip addresses from %v", host)
-
 	packet := ConstrPacket(id, true, nameQtypes)
 	buffer := PacketToBuf(packet)
 
 	_, err = socket.Write(From_512buffer(buffer.Buf))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error while writing to %v, %v", host, err)
 	}
 
 	replyBuffer := make([]byte, 512)

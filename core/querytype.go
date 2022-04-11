@@ -1,10 +1,8 @@
 package core
 
-import (
 // "errors"
 // "fmt"
 // "strings"
-)
 
 type QueryType uint16
 

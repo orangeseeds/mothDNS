@@ -192,6 +192,7 @@ func (d *DnsRecord) Read(buffer *BytePacketBuffer) (*DnsRecord, error) {
 func (d *DnsRecord) Write(buffer *BytePacketBuffer) (uint, error) {
 
 	start_pos := buffer.Pos()
+	fmt.Println(d)
 
 	switch d.Type {
 	// For A
