@@ -14,24 +14,8 @@ func ConstrPacket(id uint16, isRec bool, nameQtypes map[string]core.QueryType) c
 	for name, qtype := range nameQtypes {
 		packet.Questions = append(packet.Questions, core.NewQuestion(name, qtype))
 	}
-
 	packet.Header.Questions = uint16(len(nameQtypes))
 	return packet
-}
-
-func PacketToBuf(p core.DnsPacket) core.BytePacketBuffer {
-	buffer := core.NewBuffer()
-	p.Write(&buffer)
-	return buffer
-}
-
-func BufToPacket(b core.BytePacketBuffer) (*core.DnsPacket, error) {
-	packet := core.NewPacket()
-	_, err := packet.From_buffer(&b)
-	if err != nil {
-		return nil, err
-	}
-	return &packet, nil
 }
 
 func Lookup(nameQtypes map[string]core.QueryType, id uint16, serverType string, host string, port string) (*core.DnsPacket, error) {

@@ -33,7 +33,7 @@ func (s *UPDServer) Serve(port string) *UPDServer {
 
 }
 
-func (s *UPDServer) SetHandler(f func(net.PacketConn, net.Addr, []byte)) {
+func (s *UPDServer) SetHandler(f RqstHandler) {
 	s.Handler = f
 }
 
