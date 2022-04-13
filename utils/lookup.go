@@ -76,7 +76,6 @@ func LookUp(name string, qType core.QueryType, serverType string, host string, p
 	packet := ConstrPacket(6666, true, question)
 	buffer := PacketToBuf(packet)
 
-	fmt.Println(packet.Questions)
 	_, err = socket.Write(From_512buffer(buffer.Buf))
 	if err != nil {
 		return nil, fmt.Errorf("error while writing to %v, %v", host, err)
@@ -101,16 +100,13 @@ func LookUp(name string, qType core.QueryType, serverType string, host string, p
 
 func RecrLookUp(qname string, qtype core.QueryType) (*core.DnsPacket, error) {
 
-	ns := "193.0.14.129"
+	ns := "198.41.0.4"
 
 	for {
 		fmt.Printf("attempting lookup for %v type:%v -> %v\n", qname, qtype, ns)
+		response, _ := LookUp(qname, qtype, "udp", ns, "53")
 
-		response, err := LookUp(qname, qtype, "udp", ns, "53")
 		fmt.Printf("Status -> %v", response.Header.Rescode)
-		if err != nil {
-			return nil, err
-		}
 
 		// val, _ := json.MarshalIndent(response, "", "    ")
 		// fmt.Println("sallaaa", string(val))
@@ -132,7 +128,6 @@ func RecrLookUp(qname string, qtype core.QueryType) (*core.DnsPacket, error) {
 		} else {
 			return response, nil
 		}
-
 		// return response, nil
 	}
 }

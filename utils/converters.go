@@ -15,8 +15,8 @@ func To_512buffer(buf []byte) [512]byte {
 }
 
 func From_512buffer(buf [512]byte) []byte {
-	reply_buff := make([]byte, 512)
-	for i := range buf {
+	reply_buff := make([]byte, 250)
+	for i := range reply_buff {
 		reply_buff[i] = buf[i]
 	}
 
