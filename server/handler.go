@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/orangeseeds/DNSserver/core"
+	"github.com/orangeseeds/DNSserver/core/zone"
 )
 
 /*
@@ -59,6 +60,11 @@ func HandleConnection(socket net.PacketConn, addr net.Addr, buf []byte) {
 		replyPacket.Header.Rescode = core.FORMERR
 	}
 	replyBuffer := core.PacketToBuf(replyPacket)
+
+	z, _ := zone.NewZEntry()
+	z.PacketToZEntry(&replyPacket)
+
+	zone.WriteJson()
 	socket.WriteTo(replyBuffer.Buf, addr)
 
 }
