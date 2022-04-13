@@ -6,13 +6,13 @@ import (
 )
 
 type BytePacketBuffer struct {
-	Buf [512]byte `json:"buffer"`
+	Buf []byte `json:"buffer"`
 	pos uint
 }
 
 func NewBuffer() BytePacketBuffer {
 	b := BytePacketBuffer{
-		Buf: [512]uint8{0},
+		Buf: make([]byte, 250, 512),
 		pos: 0,
 	}
 	return b
