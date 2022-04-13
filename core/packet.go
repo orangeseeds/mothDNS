@@ -6,8 +6,6 @@ import (
 	"net"
 )
 
-// "fmt"
-
 type DnsPacket struct {
 	Header      DnsHeader     `json:"header"`
 	Questions   []DnsQuestion `json:"questions"`
@@ -84,7 +82,7 @@ func (d *DnsPacket) From_buffer(buffer *BytePacketBuffer) (*DnsPacket, error) {
 	return d, nil
 }
 
-// ################################## For Writing ###################################################
+// ---------------------------------- For Writing ---------------------------------------------------
 
 func (d *DnsPacket) Write(buffer *BytePacketBuffer) error {
 
@@ -155,6 +153,24 @@ func (d *DnsPacket) GetResolvedNS(qname string) (string, error) {
 				}
 			}
 		}
+	}
+	return "", errors.New("no as of type NS")
+}
+
+func (d *DnsPacket) GetUnresNS(qname string) (string, error) {
+
+	authorities := map[string]string{}
+	for _, a := range d.Authorities {
+		if a.NS.Host != "" {
+			authorities[a.NS.Domain] = a.NS.Host
+		}
+	}
+
+	for _, r := range d.Resources {
+		if _, ok := authorities[r.A.Domain]; !ok {
+			return r.A.Addr.String(), nil
+		}
+
 	}
 	return "", errors.New("no as of type NS")
 }

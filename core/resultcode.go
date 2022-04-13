@@ -1,10 +1,8 @@
 package core
 
-import (
-	// "errors"
-	"fmt"
-	// "strings"
-)
+// "errors"
+
+// "strings"
 
 type ResultCode uint
 
@@ -32,9 +30,4 @@ func (res ResultCode) From_num(num uint8) ResultCode {
 	default:
 		return NOERROR
 	}
-}
-
-func main() {
-	var result ResultCode
-	fmt.Println(result.From_num(1))
 }

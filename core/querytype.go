@@ -15,6 +15,20 @@ const (
 	QT_AAAA    QueryType = 28
 )
 
+var MapQt = map[QueryType]string{
+	1: "A",
+	2: "CNAME",
+	3: "MX",
+	4: "AAAA",
+}
+
+func QtName(qType QueryType) string {
+	if val, ok := MapQt[qType]; ok {
+		return val
+	}
+	return "UNKNOWN"
+}
+
 func (q QueryType) To_num() uint16 {
 	switch q {
 	case QT_A:

@@ -5,6 +5,12 @@ import (
 	"strings"
 )
 
+/*
+   This struct is responsible for all operations related to creating & manipulating byte buffer for out UPD packets.
+
+   @property Buf -> the byte buffer
+   @property pos -> for keeping track of our position the buffer
+*/
 type BytePacketBuffer struct {
 	Buf []byte `json:"buffer"`
 	pos uint
@@ -12,7 +18,7 @@ type BytePacketBuffer struct {
 
 func NewBuffer() BytePacketBuffer {
 	b := BytePacketBuffer{
-		Buf: make([]byte, 250, 512),
+		Buf: make([]byte, 511, 512),
 		pos: 0,
 	}
 	return b
@@ -152,7 +158,7 @@ func (b *BytePacketBuffer) Read_qname(outstr *string) error {
 	return nil
 }
 
-// ################################## For Writing ###################################################
+// ------------------------------ For Writing ---------------------------------------------------
 
 func (b *BytePacketBuffer) Write(val uint8) error {
 	if b.pos >= 512 {
@@ -225,7 +231,7 @@ func (b *BytePacketBuffer) Write_qname(q_name *string) error {
 	return nil
 }
 
-// ################################## For Setting ###################################################
+// ------------------------------- For Setting --------------------------------------------------
 
 func (b *BytePacketBuffer) Set(pos uint, val uint8) error {
 	b.Buf[pos] = val

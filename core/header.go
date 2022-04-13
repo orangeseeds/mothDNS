@@ -19,7 +19,6 @@ type DnsHeader struct {
 }
 
 func NewHeader() *DnsHeader {
-	// var rCode ResultCode
 	var rCode ResultCode = NOERROR
 
 	d := DnsHeader{
@@ -94,7 +93,7 @@ func (d *DnsHeader) Read(buffer *BytePacketBuffer) error {
 	return nil
 }
 
-// ################################## For Writing ###################################################
+// ---------------------------------- For Writing ---------------------------------------------------
 
 func To_uint8(v bool) uint8 {
 	num_u8 := uint8(0)

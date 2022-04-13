@@ -1,11 +1,5 @@
 package core
 
-import (
-// "errors"
-// "fmt"
-// "strings"
-)
-
 type DnsQuestion struct {
 	Name  string
 	Qtype QueryType
@@ -40,7 +34,7 @@ func (q *DnsQuestion) Read(buffer *BytePacketBuffer) error {
 	return nil
 }
 
-// ################################## For Writing ###################################################
+// ---------------------------------- For Writing ---------------------------------------------------
 
 func (d *DnsQuestion) Write(buffer *BytePacketBuffer) error {
 	if err := buffer.Write_qname(&d.Name); err != nil {

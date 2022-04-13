@@ -6,6 +6,7 @@ import (
 	"io"
 )
 
+// These functions are for converting structs, bytes to json/encoded json string for prettier printing.
 func PrettyString(str string) (string, error) {
 
 	var prettyJSON bytes.Buffer

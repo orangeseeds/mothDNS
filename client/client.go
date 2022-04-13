@@ -83,12 +83,8 @@ func lookup(qname string, qtype core.QueryType) (core.DnsPacket, error) {
 
 	_, _ = socket.Read(reply)
 	r_buffer := core.NewBuffer()
-	reply_buff := [512]byte{0}
-	for i := range buff {
-		reply_buff[i] = reply[i]
-	}
 
-	r_buffer.Buf = reply_buff
+	r_buffer.Buf = reply
 	// fmt.Println(reply_buff)
 
 	res_packet := core.NewPacket()

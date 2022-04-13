@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"log"
 	"net"
 )
@@ -36,16 +35,3 @@ func (s *UPDServer) Serve(port string) *UPDServer {
 func (s *UPDServer) SetHandler(f RqstHandler) {
 	s.Handler = f
 }
-
-func serve(socket net.PacketConn, addr net.Addr, buf []byte) {
-	message := "Heyy there! Client..."
-	fmt.Println("Something just hit me!!", string(buf))
-
-	socket.WriteTo([]byte(message), addr)
-}
-
-// func main() {
-// 	server := new(UPDServer)
-// 	server.SetHandler(serve)
-// 	server.Serve("1053")
-// }

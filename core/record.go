@@ -189,7 +189,7 @@ func (d *DnsRecord) Read(buffer *BytePacketBuffer) (*DnsRecord, error) {
 	}
 }
 
-// ################################## For Writing ###################################################
+// ---------------------------------- For Writing ---------------------------------------------------
 
 func (d *DnsRecord) Write(buffer *BytePacketBuffer) (uint, error) {
 
