@@ -45,7 +45,6 @@ var eDnsRecord = &DnsRecord{}
 
 func (d *DnsRecord) Read(buffer *BytePacketBuffer) (*DnsRecord, error) {
 
-	// fmt.Println("posi record", buffer.pos)
 	var err error
 	domain := ""
 	buffer.Read_qname(&domain)
@@ -55,28 +54,22 @@ func (d *DnsRecord) Read(buffer *BytePacketBuffer) (*DnsRecord, error) {
 		return nil, err
 	}
 	qtype_num := result
-	// fmt.Println("q_type_num---------", qtype_num)
 
 	qtype := QueryType.From_num(0, qtype_num)
-	// fmt.Println("q_type---------", qtype)
 	if _, err = buffer.Read_u16(); err != nil {
 		return nil, err
 	}
-
-	// fmt.Println(Domain)
 
 	var result_32 uint32
 	if result_32, err = buffer.Read_u32(); err != nil {
 		return nil, err
 	}
 	ttl := result_32
-	// fmt.Println("ttl---------", ttl)
 
 	if result, err = buffer.Read_u16(); err != nil {
 		return nil, err
 	}
 	data_len := result
-	// fmt.Println("data_len---------", data_len)
 
 	switch qtype {
 	case QT_A:
@@ -194,7 +187,6 @@ func (d *DnsRecord) Read(buffer *BytePacketBuffer) (*DnsRecord, error) {
 func (d *DnsRecord) Write(buffer *BytePacketBuffer) (uint, error) {
 
 	start_pos := buffer.Pos()
-	// utils.PrettyStruct()
 
 	switch d.Type {
 	// For A

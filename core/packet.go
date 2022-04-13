@@ -27,15 +27,12 @@ func NewPacket() DnsPacket {
 }
 
 func (d *DnsPacket) From_buffer(buffer *BytePacketBuffer) (*DnsPacket, error) {
-	// fmt.Println(buffer)
 	var err error
 
 	if err = d.Header.Read(buffer); err != nil {
 		return nil, err
 	}
-	// fmt.Println(d.Header)
 
-	// fmt.Println("DNS Questions")
 	for i := 0; i < int(d.Header.Questions); i++ {
 
 		question := NewQuestion("", QT_UNKNOWN)
@@ -44,11 +41,7 @@ func (d *DnsPacket) From_buffer(buffer *BytePacketBuffer) (*DnsPacket, error) {
 		}
 
 		d.Questions = append(d.Questions, question)
-		// fmt.Println(buffer.pos)
 	}
-	// fmt.Println(d.Questions)
-	//
-	// fmt.Println("DNS Answers")
 	for i := 0; i < int(d.Header.Answers); i++ {
 
 		var p_rec *DnsRecord
@@ -57,8 +50,6 @@ func (d *DnsPacket) From_buffer(buffer *BytePacketBuffer) (*DnsPacket, error) {
 		}
 		d.Answers = append(d.Answers, *p_rec)
 	}
-	// fmt.Println(d.Answers)
-	//
 	for i := 0; i < int(d.Header.Authoritative_entries); i++ {
 
 		var p_rec *DnsRecord
@@ -68,7 +59,6 @@ func (d *DnsPacket) From_buffer(buffer *BytePacketBuffer) (*DnsPacket, error) {
 		var rec = *p_rec
 		d.Authorities = append(d.Authorities, rec)
 	}
-	//
 	for i := 0; i < int(d.Header.Resource_entries); i++ {
 
 		var p_rec *DnsRecord
@@ -85,10 +75,6 @@ func (d *DnsPacket) From_buffer(buffer *BytePacketBuffer) (*DnsPacket, error) {
 // ---------------------------------- For Writing ---------------------------------------------------
 
 func (d *DnsPacket) Write(buffer *BytePacketBuffer) error {
-
-	// if err := buffer.Write_u16(d.id); err != nil {
-	// 	return err
-	// }
 
 	d.Header.Questions = uint16(len(d.Questions))
 	d.Header.Answers = uint16(len(d.Answers))
@@ -143,7 +129,6 @@ func (d *DnsPacket) GetRandomA() (net.IP, error) {
 }
 
 func (d *DnsPacket) GetResolvedNS(qname string) (string, error) {
-	// answers := map[string]string{}
 
 	for _, a := range d.Authorities {
 		if a.NS.Host != "" {
@@ -174,31 +159,3 @@ func (d *DnsPacket) GetUnresNS(qname string) (string, error) {
 	}
 	return "", errors.New("no as of type NS")
 }
-
-// func (d *DnsPacket) GetResolvedNS(qname string) (net.IP, error) {
-// 	nsMap, _ := d.GetNS(qname)
-// 	for _, ns := range nsMap {
-// 		var aResources []DnsRecord
-// 		for _, r := range d.Resources {
-// 			if r.A.Domain != "" {
-// 				aResources = append(aResources, r)
-// 			}
-// 		}
-// 		for _, a := range aResources {
-// 			if a.A.Domain == nsMap[ns] {
-// 				return a.A.Addr, nil
-// 			}
-// 		}
-
-// 	}
-// 	return nil, errors.New("no ip found for " + qname)
-// }
-
-// func (d *DnsPacket) GetUnresolvedNS(qname string) (string, error) {
-
-// 	nsMap, _ := d.GetNS(qname)
-// 	for _, ns := range nsMap {
-// 		return nsMap[ns], nil
-// 	}
-// 	return "", errors.New(qname + " not in nsMap")
-// }

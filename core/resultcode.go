@@ -1,9 +1,5 @@
 package core
 
-// "errors"
-
-// "strings"
-
 type ResultCode uint
 
 const (

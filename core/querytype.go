@@ -1,9 +1,5 @@
 package core
 
-// "errors"
-// "fmt"
-// "strings"
-
 type QueryType uint16
 
 const (
@@ -60,7 +56,3 @@ func (q QueryType) From_num(num uint16) QueryType {
 	}
 	return QT_UNKNOWN
 }
-
-// func main() {
-// 	println(QT_UNKNOWN)
-// }
