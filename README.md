@@ -10,7 +10,7 @@ GoMoth listens on a port for UPD packets. Upon recieving a valid packet it contr
 If the query is valid the root server will respond back with a list of TLDSs (Top Level Domain servers). Then out of any of the TLDs we choose the first one whose IPaddress is available. We then send our query to one of the TLDs. It responds back with a list of name servers for the asked domain. Then we again ask the name servers for the IP corresponding to the specific domain name.
 
 ##### Demo
-<img src="./assets/demo.png" width=1000 height=530 />
+<img src="./assets/demo.png" width=1000 height=500 />
 
 ## References
 - [RFC 1034](https://datatracker.ietf.org/doc/html/rfc1034)
