@@ -1,7 +1,6 @@
 package core
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 )
@@ -94,10 +93,10 @@ func (b *BytePacketBuffer) Read_qname(outstr *string) error {
 	jumps_performed := 0
 
 	delim := ""
-	for true {
+	for {
 
 		if jumps_performed > max_jumps {
-			return errors.New(fmt.Sprintf("Limit of %v jumps exceeded", max_jumps))
+			return fmt.Errorf("limit of %v jumps exceeded", max_jumps)
 		}
 
 		var len byte
@@ -204,7 +203,7 @@ func (b *BytePacketBuffer) Write_qname(q_name *string) error {
 		len := len(label)
 
 		if len > 0x3f {
-			return errors.New(fmt.Sprintf("Single label is %v, which exceeds 63 characters of length", len))
+			return fmt.Errorf("single label is %v, which exceeds 63 characters of length", len)
 		}
 
 		if err := b.Write(uint8(len)); err != nil {

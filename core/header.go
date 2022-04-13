@@ -1,7 +1,5 @@
 package core
 
-import ()
-
 type DnsHeader struct {
 	Id                    uint16     `json:"id"`                    // 16 bits
 	Recursion_desired     bool       `json:"recursion_desired"`     // 1 bit
@@ -21,8 +19,8 @@ type DnsHeader struct {
 }
 
 func NewHeader() *DnsHeader {
-	var rCode ResultCode
-	rCode = NOERROR
+	// var rCode ResultCode
+	var rCode ResultCode = NOERROR
 
 	d := DnsHeader{
 		Id:                    0,

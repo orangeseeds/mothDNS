@@ -1,8 +1,12 @@
 package core
 
 import (
-// "fmt"
+	"errors"
+	"math/rand"
+	"net"
 )
+
+// "fmt"
 
 type DnsPacket struct {
 	Header      DnsHeader     `json:"header"`
@@ -123,3 +127,62 @@ func (d *DnsPacket) Write(buffer *BytePacketBuffer) error {
 
 	return nil
 }
+
+func (d *DnsPacket) GetRandomA() (net.IP, error) {
+
+	var answers []DnsRecord
+
+	for _, a := range d.Answers {
+		if a.A.Domain != "" {
+			answers = append(answers, a)
+		}
+	}
+	if len(answers) == 0 {
+		return nil, errors.New("no as of type A")
+	}
+	chosenA := answers[rand.Intn(len(answers))]
+	return chosenA.A.Addr, nil
+}
+
+func (d *DnsPacket) GetResolvedNS(qname string) (string, error) {
+	// answers := map[string]string{}
+
+	for _, a := range d.Authorities {
+		if a.NS.Host != "" {
+			for _, r := range d.Resources {
+				if a.NS.Host == r.A.Domain {
+					return r.A.Addr.String(), nil
+				}
+			}
+		}
+	}
+	return "", errors.New("no as of type NS")
+}
+
+// func (d *DnsPacket) GetResolvedNS(qname string) (net.IP, error) {
+// 	nsMap, _ := d.GetNS(qname)
+// 	for _, ns := range nsMap {
+// 		var aResources []DnsRecord
+// 		for _, r := range d.Resources {
+// 			if r.A.Domain != "" {
+// 				aResources = append(aResources, r)
+// 			}
+// 		}
+// 		for _, a := range aResources {
+// 			if a.A.Domain == nsMap[ns] {
+// 				return a.A.Addr, nil
+// 			}
+// 		}
+
+// 	}
+// 	return nil, errors.New("no ip found for " + qname)
+// }
+
+// func (d *DnsPacket) GetUnresolvedNS(qname string) (string, error) {
+
+// 	nsMap, _ := d.GetNS(qname)
+// 	for _, ns := range nsMap {
+// 		return nsMap[ns], nil
+// 	}
+// 	return "", errors.New(qname + " not in nsMap")
+// }

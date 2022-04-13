@@ -20,18 +20,40 @@ func HandleConnection(socket net.PacketConn, addr net.Addr, buf []byte) {
 		socket.WriteTo(utils.From_512buffer(rcvBuffer.Buf), addr)
 		return
 	}
-	nameQtypes := make(map[string]core.QueryType)
-	for _, question := range rcvPacket.Questions {
-		nameQtypes[question.Name] = question.Qtype
-	}
 
-	host := "8.8.8.8"
-	respPacket, err := utils.Lookup(nameQtypes, rcvPacket.Header.Id, "udp", host, "53")
-	if err != nil {
-		log.Println("Something went wrong during the lookup...")
-		return
+	// host := "8.8.8.8"
+
+	replyPacket := core.NewPacket()
+	replyPacket.Header.Id = rcvPacket.Header.Id
+	replyPacket.Header.Recursion_desired = true
+	replyPacket.Header.Recursion_available = true
+	replyPacket.Header.Response = true
+
+	if len(rcvPacket.Questions) > 0 {
+		for _, q := range rcvPacket.Questions {
+
+			respPacket, err := utils.RecrLookUp(q.Name, q.Qtype)
+			if err != nil {
+				log.Println("Something went wrong during the lookup...")
+				replyPacket.Header.Rescode = core.SERVFAIL
+			} else {
+				log.Printf(`%v -> %v type: %v | successfully resolved!`, addr, q.Name, q.Qtype)
+
+				replyPacket.Questions = append(replyPacket.Questions, q)
+				replyPacket.Header.Rescode = respPacket.Header.Rescode
+
+				replyPacket.Answers = respPacket.Answers
+				replyPacket.Authorities = respPacket.Authorities
+
+				replyPacket.Resources = respPacket.Resources
+
+			}
+
+		}
+	} else {
+		replyPacket.Header.Rescode = core.FORMERR
 	}
-	log.Printf(`%v -> %v | successfully resolved!`, nameQtypes, addr)
-	respBuffer := utils.PacketToBuf(*respPacket)
-	socket.WriteTo(utils.From_512buffer(respBuffer.Buf), addr)
+	replyBuffer := utils.PacketToBuf(replyPacket)
+	socket.WriteTo(utils.From_512buffer(replyBuffer.Buf), addr)
+
 }

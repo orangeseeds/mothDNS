@@ -138,6 +138,7 @@ func (d *DnsRecord) Read(buffer *BytePacketBuffer) (*DnsRecord, error) {
 		eDnsRecord.NS.Host = ns
 		eDnsRecord.NS.Ttl = ttl
 
+		eDnsRecord.Type = 2
 		return eDnsRecord, nil
 
 	case QT_CNAME:
@@ -149,6 +150,7 @@ func (d *DnsRecord) Read(buffer *BytePacketBuffer) (*DnsRecord, error) {
 		eDnsRecord.CNAME.Domain = domain
 		eDnsRecord.CNAME.Host = cname
 		eDnsRecord.CNAME.Ttl = ttl
+		eDnsRecord.Type = 5
 
 		return eDnsRecord, nil
 
@@ -169,9 +171,10 @@ func (d *DnsRecord) Read(buffer *BytePacketBuffer) (*DnsRecord, error) {
 		eDnsRecord.MX.Host = mx
 		eDnsRecord.MX.Ttl = ttl
 
+		eDnsRecord.Type = 15
 		return eDnsRecord, nil
 
-	case QT_UNKNOWN:
+	default:
 		if err = buffer.Step(uint(data_len)); err != nil {
 			return nil, err
 		}
@@ -184,7 +187,6 @@ func (d *DnsRecord) Read(buffer *BytePacketBuffer) (*DnsRecord, error) {
 
 		return eDnsRecord, nil
 	}
-	return nil, nil
 }
 
 // ################################## For Writing ###################################################
@@ -192,7 +194,7 @@ func (d *DnsRecord) Read(buffer *BytePacketBuffer) (*DnsRecord, error) {
 func (d *DnsRecord) Write(buffer *BytePacketBuffer) (uint, error) {
 
 	start_pos := buffer.Pos()
-	fmt.Println(d)
+	// utils.PrettyStruct()
 
 	switch d.Type {
 	// For A
@@ -341,7 +343,6 @@ func (d *DnsRecord) Write(buffer *BytePacketBuffer) (uint, error) {
 	// For UNKONWN
 	default:
 		fmt.Printf("Skipping record %+v", d.UNKNOWN)
-
 	}
 	return (buffer.Pos() - start_pos), nil
 }

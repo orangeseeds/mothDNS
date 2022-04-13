@@ -29,8 +29,9 @@ func (res ResultCode) From_num(num uint8) ResultCode {
 		return NOTIMP
 	case 5:
 		return REFUSED
+	default:
+		return NOERROR
 	}
-	return NOERROR
 }
 
 func main() {
