@@ -4,13 +4,6 @@
 
 GoMoth is an implementation of a basic recursive DNS server without the use of any exernal libraries other than the standard libraries provided by Go. It is a passion project, implemented to learn about how DNS and DNS servers function and specially learn Golang.
 
-## References
-- [RFC 1034](https://datatracker.ietf.org/doc/html/rfc1034)
-- [RFC 1035](https://datatracker.ietf.org/doc/html/rfc1035)
-- [The Go Programming Language](https://www.gopl.io/)
-- [ GitHub - EmilHernvall/dnsguide ](https://github.com/EmilHernvall/dnsguide)
-- [JSON format to represent DNS data](https://tools.ietf.org/id/draft-bortzmeyer-dns-json-01.html#rfc.section.3.1)
-
 ## Working
 
 GoMoth listens on a port for UPD packets. Upon recieving a valid packet it contructs a DNSPacket structure using the byte buffer received. Then we have a specific domain name and query type to lookup. Since it does not have any local files as of now to lookup from, it then sends a DNS request to a root server. 
@@ -19,3 +12,9 @@ If the query is valid the root server will respond back with a list of TLDSs (To
 ##### Demo
 <img src="./assets/demo.png" width=1000 height=530 />
 
+## References
+- [RFC 1034](https://datatracker.ietf.org/doc/html/rfc1034)
+- [RFC 1035](https://datatracker.ietf.org/doc/html/rfc1035)
+- [The Go Programming Language](https://www.gopl.io/)
+- [ GitHub - EmilHernvall/dnsguide ](https://github.com/EmilHernvall/dnsguide)
+- [JSON format to represent DNS data](https://tools.ietf.org/id/draft-bortzmeyer-dns-json-01.html#rfc.section.3.1)
