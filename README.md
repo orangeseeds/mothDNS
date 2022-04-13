@@ -9,9 +9,6 @@ GoMoth is an implementation of a basic recursive DNS server without the use of a
 GoMoth listens on a port for UPD packets. Upon recieving a valid packet it contructs a DNSPacket structure using the byte buffer received. Then we have a specific domain name and query type to lookup. Since it does not have any local files as of now to lookup from, it then sends a DNS request to a root server. 
 If the query is valid the root server will respond back with a list of TLDSs (Top Level Domain servers). Then out of any of the TLDs we choose the first one whose IPaddress is available. We then send our query to one of the TLDs. It responds back with a list of name servers for the asked domain. Then we again ask the name servers for the IP corresponding to the specific domain name.
 
-##### Demo
-<img src="./assets/demo.png" width=1000 height=450 />
-
 ## References
 - [RFC 1034](https://datatracker.ietf.org/doc/html/rfc1034)
 - [RFC 1035](https://datatracker.ietf.org/doc/html/rfc1035)
