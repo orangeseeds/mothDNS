@@ -4,15 +4,6 @@
 
 GoMoth is an implementation of a basic recursive DNS server without the use of any exernal libraries other than the standard libraries provided by Go. It is a passion project, implemented to learn about how DNS and DNS servers function and specially learn Golang.
 
-## ToDos
-
-[x] A basic functioning DNS server
-[x] Make it recursive
-[-] Implement proper concurrency
-[-] Serve out of a file
-[-] Implement caching in server
-[-] Use more interfaces and generics
-
 ## References
 - [RFC 1034](https://datatracker.ietf.org/doc/html/rfc1034)
 - [RFC 1035](https://datatracker.ietf.org/doc/html/rfc1035)
@@ -26,6 +17,5 @@ GoMoth listens on a port for UPD packets. Upon recieving a valid packet it contr
 If the query is valid the root server will respond back with a list of TLDSs (Top Level Domain servers). Then out of any of the TLDs we choose the first one whose IPaddress is available. We then send our query to one of the TLDs. It responds back with a list of name servers for the asked domain. Then we again ask the name servers for the IP corresponding to the specific domain name.
 
 ##### Demo
-
-
+<img src="./assets/demo.png" width=1000 height=530 />
 
