@@ -18,7 +18,7 @@ type BytePacketBuffer struct {
 
 func NewBuffer() BytePacketBuffer {
 	b := BytePacketBuffer{
-		Buf: make([]byte, 80, 512),
+		Buf: make([]byte, 511, 512),
 		pos: 0,
 	}
 	return b

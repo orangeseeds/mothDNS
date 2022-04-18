@@ -1,10 +1,12 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net"
 
 	"github.com/orangeseeds/DNSserver/core"
+	"github.com/orangeseeds/DNSserver/utils"
 )
 
 /*
@@ -58,6 +60,7 @@ func HandleConnection(socket net.PacketConn, addr net.Addr, buf []byte) {
 	} else {
 		replyPacket.Header.Rescode = core.FORMERR
 	}
+	fmt.Println(utils.PrettyStruct(replyPacket))
 	replyBuffer := core.PacketToBuf(replyPacket)
 	socket.WriteTo(replyBuffer.Buf, addr)
 

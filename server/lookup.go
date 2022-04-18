@@ -61,6 +61,7 @@ func LookUp(name string, qType core.QueryType, serverType string, host string, p
 	if err != nil {
 		return nil, err
 	}
+	// fmt.Println(utils.PrettyStruct(replyPacket))
 
 	return replyPacket, nil
 
