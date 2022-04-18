@@ -18,6 +18,9 @@ import (
 func HandleConnection(socket net.PacketConn, addr net.Addr, buf []byte) {
 	rcvBuffer := core.NewBuffer()
 	rcvBuffer.Buf = buf
+
+	// fmt.Printf("%v", buf)
+
 	rcvPacket, err := core.BufToPacket(rcvBuffer)
 	if err != nil {
 		log.Println("request buffer to packet conversion failed...")

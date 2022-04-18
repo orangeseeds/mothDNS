@@ -5,6 +5,113 @@ import (
 	"net"
 )
 
+type Record interface {
+	recordType()
+}
+
+type UNKNOWN struct {
+	Domain   string `json:"domain,omitempty"`
+	Qtype    uint16 `json:"qtype,omitempty"`
+	Data_len uint16 `json:"data_len,omitempty"`
+	Ttl      uint32 `json:"ttl,omitempty"`
+}
+type A struct {
+	Domain string `json:"domain,omitempty"`
+	Addr   net.IP `json:"addr,omitempty"`
+	Ttl    uint32 `json:"ttl,omitempty"`
+}
+type NS struct {
+	Domain string `json:"domain,omitempty"`
+	Host   string `json:"host,omitempty"`
+	Ttl    uint32 `json:"ttl,omitempty"`
+}
+type CNAME struct {
+	Domain string `json:"domain,omitempty"`
+	Host   string `json:"host,omitempty"`
+	Ttl    uint32 `json:"ttl,omitempty"`
+}
+type MX struct {
+	Domain   string `json:"domain,omitempty"`
+	Priority uint16 `json:"priority,omitempty"`
+	Host     string `json:"host,omitempty"`
+	Ttl      uint32 `json:"ttl,omitempty"`
+}
+type AAAA struct {
+	Domain string `json:"domain,omitempty"`
+	Addr   net.IP `json:"addr,omitempty"`
+	Ttl    uint32 `json:"ttl,omitempty"`
+}
+
+func (r UNKNOWN) recordType() {}
+func (r A) recordType()       {}
+func (r NS) recordType()      {}
+func (r CNAME) recordType()   {}
+func (r MX) recordType()      {}
+func (r AAAA) recordType()    {}
+
+func ReadRecord(buffer *BytePacketBuffer) (Record, error) {
+
+	var err error
+	domain := ""
+	buffer.Read_qname(&domain)
+
+	var result uint16
+	if result, err = buffer.Read_u16(); err != nil {
+		return nil, err
+	}
+	qtype_num := result
+
+	qtype := QueryType.From_num(0, qtype_num)
+	if _, err = buffer.Read_u16(); err != nil {
+		return nil, err
+	}
+
+	var result_32 uint32
+	if result_32, err = buffer.Read_u32(); err != nil {
+		return nil, err
+	}
+	ttl := result_32
+
+	if result, err = buffer.Read_u16(); err != nil {
+		return nil, err
+	}
+	data_len := result
+
+	switch qtype {
+	case QT_A:
+		if result_32, err = buffer.Read_u32(); err != nil {
+			return nil, err
+		}
+		raw_addr := result_32
+
+		p1 := uint8((raw_addr >> 24) & 0xFF)
+		p2 := uint8((raw_addr >> 16) & 0xFF)
+		p3 := uint8((raw_addr >> 8) & 0xFF)
+		p4 := uint8((raw_addr >> 0) & 0xFF)
+
+		addr := net.IPv4(p1, p2, p3, p4)
+		a := A{
+			Domain: domain,
+			Addr:   addr,
+			Ttl:    ttl,
+		}
+		return a, nil
+	default:
+
+		if err = buffer.Step(uint(data_len)); err != nil {
+			return nil, err
+		}
+		u := UNKNOWN{
+			Domain:   domain,
+			Qtype:    qtype_num,
+			Data_len: data_len,
+			Ttl:      ttl,
+		}
+
+		return u, nil
+	}
+}
+
 type DnsRecord struct {
 	UNKNOWN struct {
 		Domain   string `json:"domain,omitempty"`

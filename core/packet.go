@@ -6,6 +6,14 @@ import (
 	"net"
 )
 
+type Packet struct {
+	Header      DnsHeader     `json:"header"`
+	Questions   []DnsQuestion `json:"questions"`
+	Answers     []Record      `json:"answers"`
+	Authorities []DnsRecord   `json:"authorities"`
+	Resources   []DnsRecord   `json:"resource"`
+}
+
 type DnsPacket struct {
 	Header      DnsHeader     `json:"header"`
 	Questions   []DnsQuestion `json:"questions"`

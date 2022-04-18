@@ -48,7 +48,7 @@ func main() {
 
 	val, _ := json.MarshalIndent(packet, "", "    ")
 	fmt.Println(string(val))
-	// fmt.Printf("%T: %v\n", packet.Header, packet.Header)
+	fmt.Printf("%T: %v\n", packet.Header, packet.Header)
 	// fmt.Printf("%T: %+v\n", packet.Questions, packet.Questions)
 	// fmt.Printf("%T: %+v\n", packet.Answers, packet.Answers)
 	// net_test()
