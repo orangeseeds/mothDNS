@@ -1,10 +1,8 @@
 package core
 
 import (
-	"errors"
 	"fmt"
 	"math/rand"
-	"net"
 )
 
 type Packet struct {
@@ -134,165 +132,35 @@ func (d *Packet) GetResolvedNS(qname string) (string, error) {
 
 func (d *Packet) GetUnresNS(qname string) (string, error) {
 
-	auth := map[string]string{}
-	for _, a := range d.Authorities {
-		if v, ok := a.(NS); ok {
-			auth[v.Domain] = v.Host
-		}
-	}
-	return "", nil
-}
-
-type DnsPacket struct {
-	Header      DnsHeader     `json:"header"`
-	Questions   []DnsQuestion `json:"questions"`
-	Answers     []DnsRecord   `json:"answers"`
-	Authorities []DnsRecord   `json:"authorities"`
-	Resources   []DnsRecord   `json:"resource"`
-}
-
-func NewPacket() DnsPacket {
-	d := DnsPacket{
-		Header:      *NewHeader(),
-		Questions:   []DnsQuestion{},
-		Answers:     []DnsRecord{},
-		Authorities: []DnsRecord{},
-		Resources:   []DnsRecord{},
-	}
-
-	return d
-}
-
-func (d *DnsPacket) From_buffer(buffer *BytePacketBuffer) (*DnsPacket, error) {
-	var err error
-
-	if err = d.Header.Read(buffer); err != nil {
-		return nil, err
-	}
-
-	for i := 0; i < int(d.Header.Questions); i++ {
-
-		question := NewQuestion("", QT_UNKNOWN)
-		if err = question.Read(buffer); err != nil {
-			return nil, err
-		}
-
-		d.Questions = append(d.Questions, question)
-	}
-	for i := 0; i < int(d.Header.Answers); i++ {
-
-		var p_rec *DnsRecord
-		if p_rec, err = eDnsRecord.Read(buffer); err != nil {
-			return nil, err
-		}
-		d.Answers = append(d.Answers, *p_rec)
-	}
-	for i := 0; i < int(d.Header.Authoritative_entries); i++ {
-
-		var p_rec *DnsRecord
-		if p_rec, err = eDnsRecord.Read(buffer); err != nil {
-			return nil, err
-		}
-		var rec = *p_rec
-		d.Authorities = append(d.Authorities, rec)
-	}
-	for i := 0; i < int(d.Header.Resource_entries); i++ {
-
-		var p_rec *DnsRecord
-		if p_rec, err = eDnsRecord.Read(buffer); err != nil {
-			return nil, err
-		}
-		var rec = *p_rec
-		d.Resources = append(d.Resources, rec)
-	}
-
-	return d, nil
-}
-
-// ---------------------------------- For Writing ---------------------------------------------------
-
-func (d *DnsPacket) Write(buffer *BytePacketBuffer) error {
-
-	d.Header.Questions = uint16(len(d.Questions))
-	d.Header.Answers = uint16(len(d.Answers))
-	d.Header.Authoritative_entries = uint16(len(d.Authorities))
-	d.Header.Resource_entries = uint16(len(d.Resources))
-
-	if err := d.Header.Write(buffer); err != nil {
-		return err
-	}
-
-	for _, question := range d.Questions {
-		if err := question.Write(buffer); err != nil {
-			return err
-		}
-	}
-
-	for _, rec := range d.Answers {
-		if _, err := rec.Write(buffer); err != nil {
-			return err
-		}
-	}
-
-	for _, rec := range d.Authorities {
-		if _, err := rec.Write(buffer); err != nil {
-			return err
-		}
-	}
-
-	for _, rec := range d.Resources {
-		if _, err := rec.Write(buffer); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (d *DnsPacket) GetRandomA() (net.IP, error) {
-
-	var answers []DnsRecord
-
-	for _, a := range d.Answers {
-		if a.A.Domain != "" {
-			answers = append(answers, a)
-		}
-	}
-	if len(answers) == 0 {
-		return nil, errors.New("no as of type A")
-	}
-	chosenA := answers[rand.Intn(len(answers))]
-	return chosenA.A.Addr, nil
-}
-
-func (d *DnsPacket) GetResolvedNS(qname string) (string, error) {
-
-	for _, a := range d.Authorities {
-		if a.NS.Host != "" {
-			for _, r := range d.Resources {
-				if a.NS.Host == r.A.Domain {
-					return r.A.Addr.String(), nil
-				}
+	auths := []string{}
+	if len(d.Authorities) != 0 {
+		for _, a := range d.Authorities {
+			if ns, ok := a.(NS); ok {
+				auths = append(auths, ns.Host)
 			}
 		}
 	}
-	return "", errors.New("no as of type NS")
+	if len(auths) == 0 {
+		return "", fmt.Errorf("no answers in packet to pick randomly")
+	}
+	return auths[rand.Intn(len(auths))], nil
+
 }
 
-func (d *DnsPacket) GetUnresNS(qname string) (string, error) {
+// func (d *DnsPacket) GetUnresNS(qname string) (string, error) {
 
-	authorities := map[string]string{}
-	for _, a := range d.Authorities {
-		if a.NS.Host != "" {
-			authorities[a.NS.Domain] = a.NS.Host
-		}
-	}
+// 	authorities := map[string]string{}
+// 	for _, a := range d.Authorities {
+// 		if a.NS.Host != "" {
+// 			authorities[a.NS.Domain] = a.NS.Host
+// 		}
+// 	}
 
-	for _, r := range d.Resources {
-		if _, ok := authorities[r.A.Domain]; !ok {
-			return r.A.Addr.String(), nil
-		}
+// 	for _, r := range d.Resources {
+// 		if _, ok := authorities[r.A.Domain]; !ok {
+// 			return r.A.Addr.String(), nil
+// 		}
 
-	}
-	return "", errors.New("no as of type NS")
-}
+// 	}
+// 	return "", errors.New("no as of type NS")
+// }

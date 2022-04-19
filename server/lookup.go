@@ -99,14 +99,14 @@ func RecrLookUp(qname string, qtype core.QueryType) (*core.Packet, error) {
 			continue
 		}
 
-		if newNs, err := response.GetUnresNS(qname); err == nil {
-			ns = newNs
-		} else {
+		var newName string
+		if newNsName, err := response.GetUnresNS(qname); err != nil {
 			return response, nil
+		} else {
+			newName = newNsName
 		}
 
-		recrResponse, _ := RecrLookUp(qname, core.QT_A)
-
+		recrResponse, _ := RecrLookUp(newName, core.QT_A)
 		if newNs, err := recrResponse.GetRandomA(); err == nil {
 			ns = string(newNs.(core.A).Addr.String())
 		} else {

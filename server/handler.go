@@ -21,7 +21,7 @@ func HandleConnection(socket net.PacketConn, addr net.Addr, buf []byte) {
 
 	// fmt.Printf("%v", buf)
 
-	rcvPacket, err := core.BufToPacket(rcvBuffer)
+	rcvPacket, err := core.PacketFrmBuff(&rcvBuffer)
 	if err != nil {
 		log.Println("request buffer to packet conversion failed...")
 		return
