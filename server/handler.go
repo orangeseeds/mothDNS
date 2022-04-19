@@ -62,6 +62,6 @@ func HandleConnection(socket net.PacketConn, addr net.Addr, buf []byte) {
 		replyPacket.Header.Rescode = core.FORMERR
 	}
 	replyBuffer := core.PacketToBuf(replyPacket)
-	socket.WriteTo(replyBuffer.Buf, addr)
+	socket.WriteTo(replyBuffer.Buf[0:replyBuffer.Pos()], addr)
 
 }

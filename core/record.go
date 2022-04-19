@@ -83,12 +83,10 @@ func ReadRecord(buffer *BytePacketBuffer) (Record, error) {
 			return nil, err
 		}
 		raw_addr := result_32
-
 		p1 := uint8((raw_addr >> 24) & 0xFF)
 		p2 := uint8((raw_addr >> 16) & 0xFF)
 		p3 := uint8((raw_addr >> 8) & 0xFF)
 		p4 := uint8((raw_addr >> 0) & 0xFF)
-
 		addr := net.IPv4(p1, p2, p3, p4)
 		a := A{
 			Domain: domain,
@@ -96,8 +94,45 @@ func ReadRecord(buffer *BytePacketBuffer) (Record, error) {
 			Ttl:    ttl,
 		}
 		return a, nil
+	case QT_NS:
+		var ns string
+		if err = buffer.Read_qname(&ns); err != nil {
+			return nil, err
+		}
+		n := NS{
+			Domain: domain,
+			Host:   ns,
+			Ttl:    ttl,
+		}
+		return n, nil
+	case QT_CNAME:
+		var cname string
+		if err = buffer.Read_qname(&cname); err != nil {
+			return nil, err
+		}
+		c := CNAME{
+			Domain: domain,
+			Host:   cname,
+			Ttl:    ttl,
+		}
+		return c, nil
+	case QT_MX:
+		var priority uint16
+		var mx string
+		if priority, err = buffer.Read_u16(); err != nil {
+			return nil, err
+		}
+		if err = buffer.Read_qname(&mx); err != nil {
+			return nil, err
+		}
+		m := MX{
+			Domain:   domain,
+			Priority: priority,
+			Host:     mx,
+			Ttl:      ttl,
+		}
+		return m, nil
 	default:
-
 		if err = buffer.Step(uint(data_len)); err != nil {
 			return nil, err
 		}
@@ -107,9 +142,163 @@ func ReadRecord(buffer *BytePacketBuffer) (Record, error) {
 			Data_len: data_len,
 			Ttl:      ttl,
 		}
-
 		return u, nil
 	}
+}
+
+func WriteRecord(r Record, buffer *BytePacketBuffer) (uint, error) {
+
+	start_pos := buffer.Pos()
+
+	switch r.(type) {
+	// For A
+	case A:
+		if err := buffer.Write_qname(r.(A).Domain); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u16(uint16(QT_A)); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u16(1); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u32(r.(A).Ttl); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u16(4); err != nil {
+			return 0, err
+		}
+
+		octets := r.(A).Addr[len(r.(A).Addr)-4:]
+		if err := buffer.Write_u8(octets[0]); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u8(octets[1]); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u8(octets[2]); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u8(octets[3]); err != nil {
+			return 0, err
+		}
+
+	case NS:
+		if err := buffer.Write_qname(r.(NS).Domain); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u16(uint16(QT_NS)); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u16(1); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u32(r.(NS).Ttl); err != nil {
+			return 0, err
+		}
+
+		pos := buffer.Pos()
+		if err := buffer.Write_u16(0); err != nil {
+			return 0, err
+		}
+
+		if err := buffer.Write_qname(r.(NS).Host); err != nil {
+			return 0, err
+		}
+
+		size := buffer.Pos() - (pos + 2)
+		if err := buffer.Set_u16(pos, uint16(size)); err != nil {
+			return 0, err
+		}
+
+	case CNAME:
+		if err := buffer.Write_qname(r.(CNAME).Domain); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u16(uint16(QT_CNAME)); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u16(1); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u32(r.(CNAME).Ttl); err != nil {
+			return 0, err
+		}
+
+		pos := buffer.Pos()
+		if err := buffer.Write_u16(0); err != nil {
+			return 0, err
+		}
+
+		if err := buffer.Write_qname(r.(NS).Host); err != nil {
+			return 0, err
+		}
+
+		size := buffer.Pos() - (pos + 2)
+		if err := buffer.Set_u16(pos, uint16(size)); err != nil {
+			return 0, err
+		}
+
+	case MX:
+		if err := buffer.Write_qname(r.(MX).Domain); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u16(uint16(QT_MX)); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u16(1); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u32(r.(MX).Ttl); err != nil {
+			return 0, err
+		}
+
+		pos := buffer.Pos()
+		if err := buffer.Write_u16(0); err != nil {
+			return 0, err
+		}
+
+		if err := buffer.Write_u16(r.(MX).Priority); err != nil {
+			return 0, err
+		}
+
+		if err := buffer.Write_qname(r.(MX).Host); err != nil {
+			return 0, err
+		}
+
+		size := buffer.Pos() - (pos + 2)
+		if err := buffer.Set_u16(pos, uint16(size)); err != nil {
+			return 0, err
+		}
+
+	case AAAA:
+		if err := buffer.Write_qname(r.(AAAA).Domain); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u16(uint16(QT_AAAA)); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u16(1); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u32(r.(AAAA).Ttl); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u16(16); err != nil {
+			return 0, err
+		}
+
+		for octet := range r.(AAAA).Addr {
+			if err := buffer.Write_u16(uint16(octet)); err != nil {
+				return 0, err
+			}
+		}
+
+	// For UNKONWN
+	default:
+		fmt.Printf("Skipping record %+v", r.(UNKNOWN))
+	}
+	return (buffer.Pos() - start_pos), nil
 }
 
 type DnsRecord struct {
@@ -298,7 +487,7 @@ func (d *DnsRecord) Write(buffer *BytePacketBuffer) (uint, error) {
 	switch d.Type {
 	// For A
 	case 1:
-		if err := buffer.Write_qname(&d.A.Domain); err != nil {
+		if err := buffer.Write_qname(d.A.Domain); err != nil {
 			return 0, err
 		}
 		if err := buffer.Write_u16(uint16(QT_A)); err != nil {
@@ -329,7 +518,7 @@ func (d *DnsRecord) Write(buffer *BytePacketBuffer) (uint, error) {
 		}
 
 	case 2:
-		if err := buffer.Write_qname(&d.NS.Domain); err != nil {
+		if err := buffer.Write_qname(d.NS.Domain); err != nil {
 			return 0, err
 		}
 		if err := buffer.Write_u16(uint16(QT_NS)); err != nil {
@@ -347,7 +536,7 @@ func (d *DnsRecord) Write(buffer *BytePacketBuffer) (uint, error) {
 			return 0, err
 		}
 
-		if err := buffer.Write_qname(&d.NS.Host); err != nil {
+		if err := buffer.Write_qname(d.NS.Host); err != nil {
 			return 0, err
 		}
 
@@ -357,7 +546,7 @@ func (d *DnsRecord) Write(buffer *BytePacketBuffer) (uint, error) {
 		}
 
 	case 5:
-		if err := buffer.Write_qname(&d.CNAME.Domain); err != nil {
+		if err := buffer.Write_qname(d.CNAME.Domain); err != nil {
 			return 0, err
 		}
 		if err := buffer.Write_u16(uint16(QT_CNAME)); err != nil {
@@ -375,7 +564,7 @@ func (d *DnsRecord) Write(buffer *BytePacketBuffer) (uint, error) {
 			return 0, err
 		}
 
-		if err := buffer.Write_qname(&d.NS.Host); err != nil {
+		if err := buffer.Write_qname(d.NS.Host); err != nil {
 			return 0, err
 		}
 
@@ -385,7 +574,7 @@ func (d *DnsRecord) Write(buffer *BytePacketBuffer) (uint, error) {
 		}
 
 	case 15:
-		if err := buffer.Write_qname(&d.MX.Domain); err != nil {
+		if err := buffer.Write_qname(d.MX.Domain); err != nil {
 			return 0, err
 		}
 		if err := buffer.Write_u16(uint16(QT_MX)); err != nil {
@@ -407,7 +596,7 @@ func (d *DnsRecord) Write(buffer *BytePacketBuffer) (uint, error) {
 			return 0, err
 		}
 
-		if err := buffer.Write_qname(&d.MX.Host); err != nil {
+		if err := buffer.Write_qname(d.MX.Host); err != nil {
 			return 0, err
 		}
 
@@ -417,7 +606,7 @@ func (d *DnsRecord) Write(buffer *BytePacketBuffer) (uint, error) {
 		}
 
 	case 28:
-		if err := buffer.Write_qname(&d.AAAA.Domain); err != nil {
+		if err := buffer.Write_qname(d.AAAA.Domain); err != nil {
 			return 0, err
 		}
 		if err := buffer.Write_u16(uint16(QT_AAAA)); err != nil {

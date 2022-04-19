@@ -37,7 +37,7 @@ func (q *DnsQuestion) Read(buffer *BytePacketBuffer) error {
 // ---------------------------------- For Writing ---------------------------------------------------
 
 func (d *DnsQuestion) Write(buffer *BytePacketBuffer) error {
-	if err := buffer.Write_qname(&d.Name); err != nil {
+	if err := buffer.Write_qname(d.Name); err != nil {
 		return err
 	}
 

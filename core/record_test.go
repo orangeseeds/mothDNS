@@ -1,37 +1,31 @@
 package core_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/orangeseeds/DNSserver/core"
 	"github.com/orangeseeds/DNSserver/utils"
 )
 
-func TestUnkRecord(t *testing.T) {
-	recordU := core.UNKNOWN{
-		Domain:   "google.com",
-		Qtype:    32,
-		Data_len: 600,
-		Ttl:      800,
-	}
+func TestRecordBuilding(t *testing.T) {
+	f, _ := os.Open("response_packet.txt")
+	defer f.Close()
 
-	recordA := core.A{
-		Domain: "yahoo.com",
-		Ttl:    900,
-	}
+	buffer := core.NewBuffer()
+	buff := make([]byte, 512)
+	_, _ = f.Read(buff)
+	buffer.Buf = buff
 
-	records := []core.Record{}
-	records = append(records, recordU)
-	records = append(records, recordA)
+	// t.Log(buffer)
 
-	for _, r := range records {
-		val, _ := utils.PrettyStruct(r)
-		switch r.(type) {
-		case core.UNKNOWN:
-			t.Logf("UNKNOWN %v", val)
-
-		case core.A:
-			t.Logf("A %v", val)
-		}
-	}
+	packet, _ := core.PacketFrmBuff(&buffer)
+	val, _ := packet.GetResolvedNS()
+	t.Logf(val)
+	// for _, r := range packet.Resources {
+	// 	t.Logf("%T", r)
+	// }
+	t.Log(utils.PrettyStruct(packet))
+	// respBuff, _ := core.BuffFrmPacket(*packet)
+	// t.Log(respBuff.Buf[0:int(respBuff.Pos())])
 }

@@ -204,8 +204,8 @@ func (b *BytePacketBuffer) Write_u32(val uint32) error {
 	return nil
 }
 
-func (b *BytePacketBuffer) Write_qname(q_name *string) error {
-	for _, label := range strings.Split(*q_name, ".") {
+func (b *BytePacketBuffer) Write_qname(q_name string) error {
+	for _, label := range strings.Split(q_name, ".") {
 		len := len(label)
 
 		if len > 0x3f {
