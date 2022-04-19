@@ -14,14 +14,17 @@ func TestRecordBuilding(t *testing.T) {
 
 	buffer := core.NewBuffer()
 	buff := make([]byte, 512)
+
 	_, _ = f.Read(buff)
 	buffer.Buf = buff
 
+	t.Log(buffer)
 	// t.Log(buffer)
 
 	packet, _ := core.PacketFrmBuff(&buffer)
-	val, _ := packet.GetResolvedNS()
-	t.Logf(val)
+	ansBuf, _ := core.BuffFrmPacket(*packet)
+
+	t.Log(ansBuf)
 	// for _, r := range packet.Resources {
 	// 	t.Logf("%T", r)
 	// }

@@ -40,6 +40,22 @@ type AAAA struct {
 	Addr   net.IP `json:"addr,omitempty"`
 	Ttl    uint32 `json:"ttl,omitempty"`
 }
+type SOA struct {
+	Domain  string
+	Mname   string
+	Rname   string
+	Serial  uint32
+	Refresh uint32
+	Retry   uint32
+	Expire  uint32
+	Minimum uint32
+	Ttl     uint32
+}
+type TXT struct {
+	Domain string
+	Data   string
+	Ttl    uint32
+}
 
 func (r UNKNOWN) recordType() {}
 func (r A) recordType()       {}
@@ -47,6 +63,7 @@ func (r NS) recordType()      {}
 func (r CNAME) recordType()   {}
 func (r MX) recordType()      {}
 func (r AAAA) recordType()    {}
+func (r SOA) recordType()     {}
 
 func ReadRecord(buffer *BytePacketBuffer) (Record, error) {
 
@@ -131,6 +148,45 @@ func ReadRecord(buffer *BytePacketBuffer) (Record, error) {
 			Ttl:      ttl,
 		}
 		return m, nil
+	case QT_SOA:
+		var serial, refresh, retry, expire, minimum uint32
+		mName := ""
+		if err = buffer.Read_qname(&mName); err != nil {
+			return nil, err
+		}
+		rName := ""
+		if err = buffer.Read_qname(&rName); err != nil {
+			return nil, err
+		}
+		if serial, err = buffer.Read_u32(); err != nil {
+			return nil, err
+		}
+		if refresh, err = buffer.Read_u32(); err != nil {
+			return nil, err
+		}
+		if retry, err = buffer.Read_u32(); err != nil {
+			return nil, err
+		}
+		if expire, err = buffer.Read_u32(); err != nil {
+			return nil, err
+		}
+		if minimum, err = buffer.Read_u32(); err != nil {
+			return nil, err
+		}
+
+		s := SOA{
+			Domain:  domain,
+			Mname:   mName,
+			Rname:   rName,
+			Serial:  serial,
+			Refresh: refresh,
+			Retry:   retry,
+			Expire:  expire,
+			Minimum: minimum,
+			Ttl:     ttl,
+		}
+		return s, nil
+
 	default:
 		if err = buffer.Step(uint(data_len)); err != nil {
 			return nil, err
@@ -269,7 +325,48 @@ func WriteRecord(r Record, buffer *BytePacketBuffer) (uint, error) {
 		if err := buffer.Set_u16(pos, uint16(size)); err != nil {
 			return 0, err
 		}
+	case SOA:
+		if err := buffer.Write_qname(r.(SOA).Domain); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u16(1); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u16(uint16(r.(SOA).Ttl)); err != nil {
+			return 0, err
+		}
 
+		pos := buffer.Pos()
+		if err := buffer.Write_u16(0); err != nil {
+			return 0, err
+		}
+
+		if err := buffer.Write_qname(r.(SOA).Mname); err != nil {
+			return 0, err
+		}
+
+		if err := buffer.Write_qname(r.(SOA).Rname); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u32(r.(SOA).Serial); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u32(r.(SOA).Refresh); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u32(r.(SOA).Retry); err != nil {
+			return 0, err
+		}
+
+		if err := buffer.Write_u32(r.(SOA).Expire); err != nil {
+			return 0, err
+		}
+		if err := buffer.Write_u32(r.(SOA).Minimum); err != nil {
+			return 0, err
+		}
+
+		size := buffer.Pos() - (pos + 2)
+		buffer.Set_u16(pos, uint16(size))
 	case AAAA:
 		if err := buffer.Write_qname(r.(AAAA).Domain); err != nil {
 			return 0, err

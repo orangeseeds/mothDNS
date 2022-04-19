@@ -6,6 +6,7 @@ import (
 	"net"
 
 	"github.com/orangeseeds/DNSserver/core"
+	"github.com/orangeseeds/DNSserver/utils"
 )
 
 // A helper function for setting some constraints on questions, doesn't really do much right now.
@@ -61,7 +62,8 @@ func LookUp(name string, qType core.QueryType, serverType string, host string, p
 	if err != nil {
 		return nil, err
 	}
-
+	val, _ := utils.PrettyStruct(replyPacket)
+	fmt.Println(val)
 	return replyPacket, nil
 
 }
