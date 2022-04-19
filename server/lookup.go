@@ -30,7 +30,7 @@ func CheckQuestions(questions []core.DnsQuestion) bool {
 
    @return replyPacket	-> relpy from the server
 */
-func LookUp(name string, qType core.QueryType, serverType string, host string, port string) (*core.DnsPacket, error) {
+func LookUp(name string, qType core.QueryType, serverType string, host string, port string) (*core.Packet, error) {
 	socket, err := net.Dial(serverType, host+":"+port)
 	if err != nil {
 		return nil, err
@@ -41,15 +41,15 @@ func LookUp(name string, qType core.QueryType, serverType string, host string, p
 		name: qType,
 	}
 
-	packet := core.ConstrPacket(6666, true, question)
-	buffer := core.PacketToBuf(packet)
+	packet := core.MakePacket(6666, true, question)
+	buffer, _ := core.BuffFrmPacket(packet)
 
 	_, err = socket.Write(buffer.Buf)
 	if err != nil {
 		return nil, fmt.Errorf("error while writing to %v, %v", host, err)
 	}
 
-	replyBuffer := make([]byte, 512)
+	replyBuffer := make([]byte, 1000)
 	_, err = socket.Read(replyBuffer)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func LookUp(name string, qType core.QueryType, serverType string, host string, p
 
 	packetBuffer := core.NewBuffer()
 	packetBuffer.Buf = replyBuffer
-	replyPacket, err := core.BufToPacket(packetBuffer)
+	replyPacket, err := core.PacketFrmBuff(&packetBuffer)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func LookUp(name string, qType core.QueryType, serverType string, host string, p
     - We then query the first TLDS that meets our requirement and get a list of name servers for the Domain
     - Any of the name servers should be able to resolve our Domain Name to IPadress
 */
-func RecrLookUp(qname string, qtype core.QueryType) (*core.DnsPacket, error) {
+func RecrLookUp(qname string, qtype core.QueryType) (*core.Packet, error) {
 
 	ns := "198.41.0.4"
 
@@ -108,7 +108,7 @@ func RecrLookUp(qname string, qtype core.QueryType) (*core.DnsPacket, error) {
 		recrResponse, _ := RecrLookUp(qname, core.QT_A)
 
 		if newNs, err := recrResponse.GetRandomA(); err == nil {
-			ns = string(newNs)
+			ns = string(newNs.(core.A).Addr.String())
 		} else {
 			return response, nil
 		}

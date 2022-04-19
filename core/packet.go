@@ -117,7 +117,7 @@ func (d *Packet) GetRandomA() (Record, error) {
 	return answers[rand.Intn(len(answers))], nil
 }
 
-func (d *Packet) GetResolvedNS() (string, error) {
+func (d *Packet) GetResolvedNS(qname string) (string, error) {
 	for _, r := range d.Authorities {
 		if a, ok := r.(NS); ok {
 			for _, u := range d.Resources {
@@ -132,7 +132,7 @@ func (d *Packet) GetResolvedNS() (string, error) {
 	return "", fmt.Errorf("no as of type NS")
 }
 
-func (d *Packet) GetUnresNS() (string, error) {
+func (d *Packet) GetUnresNS(qname string) (string, error) {
 
 	auth := map[string]string{}
 	for _, a := range d.Authorities {

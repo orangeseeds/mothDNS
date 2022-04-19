@@ -31,7 +31,7 @@ func HandleConnection(socket net.PacketConn, addr net.Addr, buf []byte) {
 		return
 	}
 
-	replyPacket := core.NewPacket()
+	replyPacket := core.Packet{}
 	replyPacket.Header.Id = rcvPacket.Header.Id
 	replyPacket.Header.Recursion_desired = true
 	replyPacket.Header.Recursion_available = true
@@ -45,7 +45,6 @@ func HandleConnection(socket net.PacketConn, addr net.Addr, buf []byte) {
 				log.Println("Something went wrong during the lookup...")
 				replyPacket.Header.Rescode = core.SERVFAIL
 			} else {
-				log.Printf(`%v -> %v type: %v | resolved!`, addr, q.Name, core.QtName(q.Qtype))
 
 				replyPacket.Questions = append(replyPacket.Questions, q)
 				replyPacket.Header.Rescode = respPacket.Header.Rescode
@@ -54,6 +53,7 @@ func HandleConnection(socket net.PacketConn, addr net.Addr, buf []byte) {
 				replyPacket.Authorities = respPacket.Authorities
 
 				replyPacket.Resources = respPacket.Resources
+				log.Printf(`%v -> %v type: %v | replied!`, addr, q.Name, core.QtName(q.Qtype))
 
 			}
 
@@ -61,7 +61,7 @@ func HandleConnection(socket net.PacketConn, addr net.Addr, buf []byte) {
 	} else {
 		replyPacket.Header.Rescode = core.FORMERR
 	}
-	replyBuffer := core.PacketToBuf(replyPacket)
+	replyBuffer, _ := core.BuffFrmPacket(replyPacket)
 	socket.WriteTo(replyBuffer.Buf[0:replyBuffer.Pos()], addr)
 
 }

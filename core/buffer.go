@@ -11,6 +11,9 @@ import (
    @property Buf -> the byte buffer
    @property pos -> for keeping track of our position the buffer
 */
+
+var MaxSize uint = 511
+
 type BytePacketBuffer struct {
 	Buf []byte `json:"buffer"`
 	pos uint
@@ -39,7 +42,7 @@ func (b *BytePacketBuffer) Seek(pos uint) error {
 }
 
 func (b *BytePacketBuffer) Read() (uint8, error) {
-	if b.pos >= 512 {
+	if b.pos >= uint(MaxSize) {
 		return 0, EOBError
 	}
 	cur_byte := b.Buf[b.pos]
@@ -49,7 +52,7 @@ func (b *BytePacketBuffer) Read() (uint8, error) {
 }
 
 func (b *BytePacketBuffer) Get(pos uint) (uint8, error) {
-	if b.pos >= 512 {
+	if b.pos >= MaxSize {
 		return 0, EOBError
 	}
 
@@ -57,7 +60,7 @@ func (b *BytePacketBuffer) Get(pos uint) (uint8, error) {
 }
 
 func (b *BytePacketBuffer) Get_range(start uint, len uint) ([]uint8, error) {
-	if start+len >= 512 {
+	if start+len >= MaxSize {
 		return nil, EOBError
 	}
 	return b.Buf[start : start+len], nil
@@ -161,7 +164,7 @@ func (b *BytePacketBuffer) Read_qname(outstr *string) error {
 // ------------------------------ For Writing ---------------------------------------------------
 
 func (b *BytePacketBuffer) Write(val uint8) error {
-	if b.pos >= 512 {
+	if b.pos >= MaxSize {
 		return EOBError
 	}
 	b.Buf[b.pos] = val

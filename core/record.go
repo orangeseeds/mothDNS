@@ -296,7 +296,8 @@ func WriteRecord(r Record, buffer *BytePacketBuffer) (uint, error) {
 
 	// For UNKONWN
 	default:
-		fmt.Printf("Skipping record %+v", r.(UNKNOWN))
+		// log.Printf("Skipping record of query type %d\n", r.(UNKNOWN).Qtype)
+		// fmt.Printf("Skipping record %+v", r.(UNKNOWN))
 	}
 	return (buffer.Pos() - start_pos), nil
 }
