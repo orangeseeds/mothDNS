@@ -2,7 +2,7 @@
 # mothDNS
 #### _A simple resursive DNS server made in Go_
 
-GoMoth is an implementation of a basic recursive DNS server without the use of any exernal libraries other than the standard libraries provided by Go. It is a passion project, implemented to learn about how DNS and DNS servers function and specially learn Golang.
+GoMoth is an implementation of a basic recursive DNS server without the use of any exernal libraries other than the standard libraries provided by Go. It is a passion project, implemented to learn about how DNS and DNS servers function and specially learn Golang. This project is mainly for educational purpose.
 
 ## References
 - [RFC 1034](https://datatracker.ietf.org/doc/html/rfc1034)
