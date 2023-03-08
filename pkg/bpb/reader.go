@@ -57,7 +57,7 @@ func (b *BytePacketBuffer) ReadFourBytes() (uint32, error) {
 	return fourBytes, nil
 }
 
-// TODO: refacor the ReadQName function
+// ReadQName parses and returns QName from the current position in the packet buffer.
 func (b *BytePacketBuffer) ReadQName(qName *string) error {
 	var (
 		currPosition uint = b.Pos()
@@ -120,72 +120,3 @@ func (b *BytePacketBuffer) ReadQName(qName *string) error {
 
 	return nil
 }
-
-// func (b *BytePacketBuffer) ReadQName(outstr *string) error {
-
-// 	var err error
-// 	var pos = b.Pos()
-
-// 	jumped := false
-// 	max_jumps := 5
-// 	jumps_performed := 0
-
-// 	delim := ""
-// 	for {
-
-// 		if jumps_performed > max_jumps {
-// 			return fmt.Errorf("limit of %v jumps exceeded", max_jumps)
-// 		}
-
-// 		var len byte
-// 		if len, err = b.Get(pos); err != nil {
-// 			return err
-// 		}
-// 		if len == 0xC0 {
-
-// 			if !jumped {
-// 				b.Seek(pos + 2)
-// 			}
-
-// 			var p_b2 byte
-// 			if p_b2, err = b.Get(pos + 1); err != nil {
-// 				return err
-// 			}
-// 			b2 := uint16(p_b2)
-
-// 			offset := ((uint16(len) ^ 0xC0) << 8) | b2
-// 			pos = uint(offset)
-
-// 			jumped = true
-// 			jumps_performed += 1
-// 			continue
-// 		} else {
-// 			pos = pos + 1
-
-// 			if len == 0 {
-// 				break
-// 			}
-
-// 			*outstr = fmt.Sprintf("%s%s", *outstr, delim)
-
-// 			var str_buffer []uint8
-
-// 			if str_buffer, err = b.GetRange(pos, uint(len)); err != nil {
-// 				return err
-// 			}
-
-// 			*outstr = fmt.Sprintf("%s%s", *outstr, strings.ToLower(string(str_buffer)))
-
-// 			delim = "."
-
-// 			pos = pos + uint(len)
-// 		}
-// 	}
-
-// 	if !jumped {
-// 		b.Seek(pos)
-
-// 	}
-
-// 	return nil
-// }
