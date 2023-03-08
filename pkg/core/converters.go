@@ -6,7 +6,7 @@ import (
 
 // Some utility function to reuse in the code
 func PacketToBuf(p DNSPacket) bpb.BytePacketBuffer {
-	buffer := bpb.NewBuffer()
+	buffer := bpb.New()
 	p.Write(&buffer)
 	buffer.Buf = buffer.Buf[0 : buffer.Pos()+1]
 	return buffer

@@ -336,7 +336,7 @@ func (d *DNSRecord) Write(buffer *bpb.BytePacketBuffer) (uint, error) {
 
 	// For UNKONWN
 	default:
-		fmt.Printf("Skipping record %+v", d.UNKNOWN)
+		fmt.Printf("Skipping record %+v\n", d.UNKNOWN)
 	}
 	return (buffer.Pos() - start_pos), nil
 }

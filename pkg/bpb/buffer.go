@@ -8,7 +8,10 @@ import (
 
 var EOBError = errors.New("Buffer greater than or equals 512")
 
-const MAXSIZE = 512
+const (
+	MaxSize     = 512
+	JumpTrigger = 0xC0
+)
 
 // This struct is responsible for all operations related to creating
 // & manipulating byte buffer for out UPD packets.
@@ -22,10 +25,10 @@ type BytePacketBuffer struct {
 	size uint
 }
 
-func NewBuffer() BytePacketBuffer {
+func New() BytePacketBuffer {
 	b := BytePacketBuffer{
 		pos:  0,
-		size: MAXSIZE,
+		size: MaxSize,
 	}
 	b.Buf = make([]byte, b.size)
 	return b

@@ -17,7 +17,7 @@ Handles the DNS question sent to the server.
 */
 func HandleConnection(socket net.PacketConn, addr net.Addr, buf []byte) {
 	// fmt.Printf("%v: \n", buf)
-	rcvBuffer := bpb.NewBuffer()
+	rcvBuffer := bpb.New()
 	rcvBuffer.Buf = buf
 	rcvPacket, err := core.BufToPacket(rcvBuffer)
 	if err != nil {

@@ -56,7 +56,7 @@ func LookUp(name string, qType core.QueryType, serverType string, host string, p
 		return nil, err
 	}
 
-	packetBuffer := bpb.NewBuffer()
+	packetBuffer := bpb.New()
 	packetBuffer.Buf = replyBuffer
 	replyPacket, err := core.BufToPacket(packetBuffer)
 	if err != nil {

@@ -1,7 +1,6 @@
 package bpb
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 )
@@ -59,96 +58,134 @@ func (b *BytePacketBuffer) ReadFourBytes() (uint32, error) {
 }
 
 // TODO: refacor the ReadQName function
-func (b *BytePacketBuffer) ReadName() (error, string, uint) {
-	pos := b.Pos()
-	len, err := b.Get(b.Pos())
-	if err != nil {
-		return errors.New("Idk some kinda error!"), "", 0
-	}
+func (b *BytePacketBuffer) ReadQName(qName *string) error {
+	var (
+		currPosition uint = b.Pos()
+		hasJumped    bool
+		maxJumps     int = 5
+		jumpCount    int
+		delimeter    string
+		strBuffer    []uint8
+	)
 
-	if (len & 0xC0) == 0xC0 {
-
-		b.Seek(pos + 2)
-
-		var p_b2 byte
-		if p_b2, err = b.Get(pos + 1); err != nil {
-			return err, "", 0
-		}
-		b2 := uint16(p_b2)
-
-		offset := ((uint16(len) ^ 0xC0) << 8) | b2
-		pos = uint(offset)
-		return nil, "", pos
-	}
-
-	return nil, "", 0
-}
-
-func (b *BytePacketBuffer) ReadQName(outstr *string) error {
-
-	var err error
-	var pos = b.Pos()
-
-	jumped := false
-	max_jumps := 5
-	jumps_performed := 0
-
-	delim := ""
 	for {
-
-		if jumps_performed > max_jumps {
-			return fmt.Errorf("limit of %v jumps exceeded", max_jumps)
+		if jumpCount > maxJumps {
+			return fmt.Errorf("limit of %v jumps exceeded", maxJumps)
 		}
-
-		var len byte
-		if len, err = b.Get(pos); err != nil {
+		len, err := b.Get(currPosition)
+		if err != nil {
 			return err
 		}
-		if (len & 0xC0) == 0xC0 {
-
-			if !jumped {
-				b.Seek(pos + 2)
+		// Due to limitations to the size to a DNS packet to 512, as suggested in RFC 1035 there is
+		// a kind of compression mechanism implemented.
+		// When data like "google.com" appear multiple times in a packet, after the first occurence
+		// they are referenced using the jump directive, which tells the parser to jump to the location pointed
+		// and start reading the data for QName.
+		// This jump directive is such that two MSBs of length label is set in ourcase 0xC0
+		if (len & JumpTrigger) == JumpTrigger {
+			if !hasJumped {
+				b.Seek(currPosition + 2)
 			}
-
-			var p_b2 byte
-			if p_b2, err = b.Get(pos + 1); err != nil {
+			jumpTo, err := b.Get(currPosition + 1)
+			if err != nil {
 				return err
 			}
-			b2 := uint16(p_b2)
-
-			offset := ((uint16(len) ^ 0xC0) << 8) | b2
-			pos = uint(offset)
-
-			jumped = true
-			jumps_performed += 1
+			jumpOffset := (uint16(len)^JumpTrigger)<<8 | uint16(jumpTo)
+			currPosition = uint(jumpOffset)
+			hasJumped = true
+			jumpCount++
 			continue
-		} else {
-			pos = pos + 1
-
-			if len == 0 {
-				break
-			}
-
-			*outstr = fmt.Sprintf("%s%s", *outstr, delim)
-
-			var str_buffer []uint8
-
-			if str_buffer, err = b.GetRange(pos, uint(len)); err != nil {
-				return err
-			}
-
-			*outstr = fmt.Sprintf("%s%s", *outstr, strings.ToLower(string(str_buffer)))
-
-			delim = "."
-
-			pos = pos + uint(len)
 		}
+
+		currPosition++
+		if len == 0 {
+			break
+		}
+		*qName = fmt.Sprintf("%s%s", *qName, delimeter)
+		strBuffer, err = b.GetRange(currPosition, uint(len))
+		if err != nil {
+			return err
+		}
+		*qName = fmt.Sprintf("%s%s",
+			*qName,
+			strings.ToLower(string(strBuffer)),
+		)
+		delimeter = "."
+		currPosition += uint(len)
 	}
 
-	if !jumped {
-		b.Seek(pos)
-
+	if !hasJumped {
+		b.Seek(currPosition)
 	}
 
 	return nil
 }
+
+// func (b *BytePacketBuffer) ReadQName(outstr *string) error {
+
+// 	var err error
+// 	var pos = b.Pos()
+
+// 	jumped := false
+// 	max_jumps := 5
+// 	jumps_performed := 0
+
+// 	delim := ""
+// 	for {
+
+// 		if jumps_performed > max_jumps {
+// 			return fmt.Errorf("limit of %v jumps exceeded", max_jumps)
+// 		}
+
+// 		var len byte
+// 		if len, err = b.Get(pos); err != nil {
+// 			return err
+// 		}
+// 		if len == 0xC0 {
+
+// 			if !jumped {
+// 				b.Seek(pos + 2)
+// 			}
+
+// 			var p_b2 byte
+// 			if p_b2, err = b.Get(pos + 1); err != nil {
+// 				return err
+// 			}
+// 			b2 := uint16(p_b2)
+
+// 			offset := ((uint16(len) ^ 0xC0) << 8) | b2
+// 			pos = uint(offset)
+
+// 			jumped = true
+// 			jumps_performed += 1
+// 			continue
+// 		} else {
+// 			pos = pos + 1
+
+// 			if len == 0 {
+// 				break
+// 			}
+
+// 			*outstr = fmt.Sprintf("%s%s", *outstr, delim)
+
+// 			var str_buffer []uint8
+
+// 			if str_buffer, err = b.GetRange(pos, uint(len)); err != nil {
+// 				return err
+// 			}
+
+// 			*outstr = fmt.Sprintf("%s%s", *outstr, strings.ToLower(string(str_buffer)))
+
+// 			delim = "."
+
+// 			pos = pos + uint(len)
+// 		}
+// 	}
+
+// 	if !jumped {
+// 		b.Seek(pos)
+
+// 	}
+
+// 	return nil
+// }

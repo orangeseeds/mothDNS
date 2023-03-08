@@ -62,7 +62,7 @@ func lookup(qname string, qtype core.QueryType) (core.DNSPacket, error) {
 	packet.Header.RecursionDesired = true
 	packet.Questions = append(packet.Questions, core.NewQuestion(string(qname), qtype))
 
-	req_buffer := bpb.NewBuffer()
+	req_buffer := bpb.New()
 	packet.Write(&req_buffer)
 
 	buff := make([]byte, 250)
@@ -77,7 +77,7 @@ func lookup(qname string, qtype core.QueryType) (core.DNSPacket, error) {
 	reply := make([]byte, 512)
 
 	_, _ = socket.Read(reply)
-	r_buffer := bpb.NewBuffer()
+	r_buffer := bpb.New()
 
 	r_buffer.Buf = reply
 	// fmt.Println(reply_buff)

@@ -40,14 +40,16 @@ func (d *dnsHeader) Read(buffer *bpb.BytePacketBuffer) error {
 		twoBytes uint16
 	)
 
-	// reading ID from first 16 bits of buffer
-	if twoBytes, err = buffer.ReadTwoBytes(); err != nil {
-		return err
+	{
+		// reading ID from first 16 bits of buffer
+		if twoBytes, err = buffer.ReadTwoBytes(); err != nil {
+			return err
+		}
+		d.Id = twoBytes
 	}
-	d.Id = twoBytes
 
 	{
-		// reading next 16 bits from QR to RCODE
+		// reading next 16 bits for QR...RCODE
 		if twoBytes, err = buffer.ReadTwoBytes(); err != nil {
 			return err
 		}
