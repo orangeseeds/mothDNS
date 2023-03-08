@@ -3,7 +3,7 @@ package main
 // TODO: Write REcord Config for IPv6 for AAAA query type
 
 import (
-	"github.com/orangeseeds/DNSserver/server"
+	"github.com/orangeseeds/mothDNS/pkg/server"
 )
 
 func main() {

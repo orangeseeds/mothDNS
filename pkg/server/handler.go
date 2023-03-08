@@ -4,19 +4,20 @@ import (
 	"log"
 	"net"
 
-	"github.com/orangeseeds/DNSserver/core"
+	"github.com/orangeseeds/mothDNS/pkg/bpb"
+	"github.com/orangeseeds/mothDNS/pkg/core"
 )
 
 /*
-   Handles the DNS question sent to the server.
+Handles the DNS question sent to the server.
 
-   @param socket   -> generic packet oriented generic connection.
-   @param addr	    -> address of the request sender
-   @param buf	    -> byte buffer received from the request
-
+@param socket   -> generic packet oriented generic connection.
+@param addr	    -> address of the request sender
+@param buf	    -> byte buffer received from the request
 */
 func HandleConnection(socket net.PacketConn, addr net.Addr, buf []byte) {
-	rcvBuffer := core.NewBuffer()
+	// fmt.Printf("%v: \n", buf)
+	rcvBuffer := bpb.NewBuffer()
 	rcvBuffer.Buf = buf
 	rcvPacket, err := core.BufToPacket(rcvBuffer)
 	if err != nil {
@@ -30,8 +31,8 @@ func HandleConnection(socket net.PacketConn, addr net.Addr, buf []byte) {
 
 	replyPacket := core.NewPacket()
 	replyPacket.Header.Id = rcvPacket.Header.Id
-	replyPacket.Header.Recursion_desired = true
-	replyPacket.Header.Recursion_available = true
+	replyPacket.Header.RecursionDesired = true
+	replyPacket.Header.RecursionAvailable = true
 	replyPacket.Header.Response = true
 
 	if len(rcvPacket.Questions) > 0 {

@@ -7,7 +7,8 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/orangeseeds/DNSserver/core"
+	"github.com/orangeseeds/mothDNS/pkg/bpb"
+	"github.com/orangeseeds/mothDNS/pkg/core"
 )
 
 // func main() {
@@ -41,20 +42,14 @@ func check(e error) {
 }
 
 func main() {
-	// fmt.Println("")
-	// read_test()
 	name := "yahoo.com"
 	packet, _ := lookup(name, core.QT_A)
 
 	val, _ := json.MarshalIndent(packet, "", "    ")
 	fmt.Println(string(val))
-	// fmt.Printf("%T: %v\n", packet.Header, packet.Header)
-	// fmt.Printf("%T: %+v\n", packet.Questions, packet.Questions)
-	// fmt.Printf("%T: %+v\n", packet.Answers, packet.Answers)
-	// net_test()
 }
 
-func lookup(qname string, qtype core.QueryType) (core.DnsPacket, error) {
+func lookup(qname string, qtype core.QueryType) (core.DNSPacket, error) {
 	socket, err := net.Dial(SERVER_TYPE, SERVER_HOST+":"+SERVER_PORT)
 	check(err)
 
@@ -64,10 +59,10 @@ func lookup(qname string, qtype core.QueryType) (core.DnsPacket, error) {
 
 	packet.Header.Id = 6666
 	packet.Header.Questions = 1
-	packet.Header.Recursion_desired = true
+	packet.Header.RecursionDesired = true
 	packet.Questions = append(packet.Questions, core.NewQuestion(string(qname), qtype))
 
-	req_buffer := core.NewBuffer()
+	req_buffer := bpb.NewBuffer()
 	packet.Write(&req_buffer)
 
 	buff := make([]byte, 250)
@@ -82,7 +77,7 @@ func lookup(qname string, qtype core.QueryType) (core.DnsPacket, error) {
 	reply := make([]byte, 512)
 
 	_, _ = socket.Read(reply)
-	r_buffer := core.NewBuffer()
+	r_buffer := bpb.NewBuffer()
 
 	r_buffer.Buf = reply
 	// fmt.Println(reply_buff)

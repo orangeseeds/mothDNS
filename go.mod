@@ -1,3 +1,3 @@
-module github.com/orangeseeds/DNSserver
+module github.com/orangeseeds/mothDNS
 
-go 1.18
+go 1.20
