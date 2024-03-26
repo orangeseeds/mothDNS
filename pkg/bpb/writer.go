@@ -9,6 +9,7 @@ func (b *BytePacketBuffer) Write(val uint8) error {
 	if b.pos >= b.size {
 		return EOBError
 	}
+
 	b.Buf[b.pos] = val
 	b.pos += 1
 	return nil

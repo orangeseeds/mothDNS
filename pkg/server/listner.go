@@ -5,19 +5,20 @@ import (
 	"net"
 )
 
-type RqstHandler func(net.PacketConn, net.Addr, []byte)
+type RqstHandler func(net.PacketConn, net.Addr, []byte, string)
 
 type UPDServer struct {
-	Handler RqstHandler
+	RootServer string
+	Handler    RqstHandler
 }
 
 func (s *UPDServer) Serve(port string) *UPDServer {
 
-	socket, err := net.ListenPacket("udp", ":"+port)
+	socket, err := net.ListenPacket("udp", port)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	log.Println("Listening on port:" + port + "...")
+	log.Println("Listening on port " + port + "...")
 	defer socket.Close()
 
 	for {
@@ -27,7 +28,7 @@ func (s *UPDServer) Serve(port string) *UPDServer {
 			log.Println(err)
 			continue
 		}
-		go s.Handler(socket, addr, buf)
+		go s.Handler(socket, addr, buf, s.RootServer)
 	}
 
 }

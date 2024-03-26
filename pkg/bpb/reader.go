@@ -33,7 +33,6 @@ func (b *BytePacketBuffer) GetRange(start uint, len uint) ([]uint8, error) {
 
 // ReadTwoBytes returns a uint16 value containing two bytes from current position and advances Pos by two.
 func (b *BytePacketBuffer) ReadTwoBytes() (uint16, error) {
-
 	byte1, err1 := b.Read()
 	byte2, err2 := b.Read()
 	if err1 != nil || err2 != nil {
@@ -45,7 +44,6 @@ func (b *BytePacketBuffer) ReadTwoBytes() (uint16, error) {
 
 // ReadTwoBytes returns a uint32 value containing four bytes from current position and advances Pos by four.
 func (b *BytePacketBuffer) ReadFourBytes() (uint32, error) {
-
 	byte1, err1 := b.Read()
 	byte2, err2 := b.Read()
 	byte3, err3 := b.Read()

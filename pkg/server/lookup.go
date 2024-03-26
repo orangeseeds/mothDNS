@@ -74,18 +74,16 @@ Send recursive DNS requests to servers of different hierarchy.
 @param qtype -> DNS question type for the request
 
 How does it works?
-  - First we set a root server, in our case we chose a.root-server.net -> 198.41.0.4 and send out query to the server.
+  - First we set a root server, in our case we chose rootServer=a.root-server.net -> 198.41.0.4 and send out query to the server.
   - After querying the root server for our domain we get a list of TLDS(Top Level Domain Server) for our specific domain type .com/.net/.np/...
   - We then query the first TLDS that meets our requirement and get a list of name servers for the Domain
   - Any of the name servers should be able to resolve our Domain Name to IPadress
 */
-func RecrLookUp(qname string, qtype core.QueryType) (*core.DNSPacket, error) {
-
-	ns := "198.41.0.4"
+func RecrLookUp(qname string, qtype core.QueryType, rootServer string) (*core.DNSPacket, error) {
 
 	for {
-		log.Printf("looking up %v type:%v -> %v\n", qname, core.QtName(qtype), ns)
-		response, _ := LookUp(qname, qtype, "udp", ns, "53")
+		log.Printf("looking up %v type:%v -> %v\n", qname, core.QtName(qtype), rootServer)
+		response, _ := LookUp(qname, qtype, "udp", rootServer, "53")
 
 		if len(response.Answers) != 0 && response.Header.Rescode == core.NOERROR {
 			return response, nil
@@ -96,20 +94,20 @@ func RecrLookUp(qname string, qtype core.QueryType) (*core.DNSPacket, error) {
 		}
 
 		if newNs, err := response.GetResolvedNS(qname); err == nil {
-			ns = newNs
+			rootServer = newNs
 			continue
 		}
 
 		if newNs, err := response.GetUnresNS(qname); err == nil {
-			ns = newNs
+			rootServer = newNs
 		} else {
 			return response, nil
 		}
 
-		recrResponse, _ := RecrLookUp(qname, core.QT_A)
+		recrResponse, _ := RecrLookUp(qname, core.QT_A, rootServer)
 
 		if newNs, err := recrResponse.GetRandomA(); err == nil {
-			ns = string(newNs)
+			rootServer = string(newNs)
 		} else {
 			return response, nil
 		}

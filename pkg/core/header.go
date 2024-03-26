@@ -5,21 +5,21 @@ import (
 )
 
 type dnsHeader struct {
-	Id                   uint16     `json:"id"`                    // 16 bits
-	Response             bool       `json:"response"`              // 1 bit
+	Rescode              ResultCode `json:"rescode"`               // 4 bits
 	Opcode               byte       `json:"opcode"`                // 4 bits
+	Response             bool       `json:"response"`              // 1 bit
 	AuthoritativeAnswer  bool       `json:"authoritative_answer"`  // 1 bit
 	TruncatedMessage     bool       `json:"truncated_message"`     // 1 bit
 	RecursionDesired     bool       `json:"recursion_desired"`     // 1 bit
 	RecursionAvailable   bool       `json:"recursion_available"`   // 1 bit
 	Z                    bool       `json:"z"`                     // 1 bit
-	Rescode              ResultCode `json:"rescode"`               // 4 bits
 	CheckingDisabled     bool       `json:"checking_disabled"`     // 1 bit
+	AuthedData           bool       `json:"authed_data"`           // 1 bit
 	Questions            uint16     `json:"questions"`             // 16 bits
 	Answers              uint16     `json:"answers"`               // 16 bits
 	AuthoritativeEntries uint16     `json:"authoritative_entries"` // 16 bits
-	AuthedData           bool       `json:"authed_data"`           // 1 bit
 	ResourceEntries      uint16     `json:"resource_entries"`      // 16 bits
+	Id                   uint16     `json:"id"`                    // 16 bits
 }
 
 func NewHeader() *dnsHeader {
@@ -29,10 +29,9 @@ func NewHeader() *dnsHeader {
 	return &d
 }
 
-func (d *dnsHeader) read(buffer *bpb.BytePacketBuffer) error {
-
-	return nil
-}
+// func (d *dnsHeader) read(buffer *bpb.BytePacketBuffer) error {
+// 	return nil
+// }
 
 func (d *dnsHeader) Read(buffer *bpb.BytePacketBuffer) error {
 	var (
@@ -119,7 +118,6 @@ func To_uint8(v bool) uint8 {
 }
 
 func (d *dnsHeader) Write(buffer *bpb.BytePacketBuffer) error {
-
 	if err := buffer.WriteTwoBytes(d.Id); err != nil {
 		return err
 	}

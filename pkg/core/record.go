@@ -31,8 +31,8 @@ type DNSRecord struct {
 	} `json:"CNAME,omitempty"`
 	MX struct {
 		Domain   string `json:"domain,omitempty"`
-		Priority uint16 `json:"priority,omitempty"`
 		Host     string `json:"host,omitempty"`
+		Priority uint16 `json:"priority,omitempty"`
 		Ttl      uint32 `json:"ttl,omitempty"`
 	} `json:"MX,omitempty"`
 	AAAA struct {
@@ -46,10 +46,12 @@ type DNSRecord struct {
 var eDnsRecord = &DNSRecord{}
 
 func (d *DNSRecord) Read(buffer *bpb.BytePacketBuffer) (*DNSRecord, error) {
-
 	var err error
 	domain := ""
-	buffer.ReadQName(&domain)
+	err = buffer.ReadQName(&domain)
+	if err != nil {
+		return nil, err
+	}
 
 	var result uint16
 	if result, err = buffer.ReadTwoBytes(); err != nil {
@@ -187,7 +189,6 @@ func (d *DNSRecord) Read(buffer *bpb.BytePacketBuffer) (*DNSRecord, error) {
 // ---------------------------------- For Writing ---------------------------------------------------
 
 func (d *DNSRecord) Write(buffer *bpb.BytePacketBuffer) (uint, error) {
-
 	start_pos := buffer.Pos()
 
 	switch d.Type {

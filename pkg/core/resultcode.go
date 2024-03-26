@@ -3,12 +3,12 @@ package core
 type ResultCode uint
 
 const (
-	NOERROR  ResultCode = iota
-	FORMERR             = 1
-	SERVFAIL            = 2
-	NXDOMAIN            = 3
-	NOTIMP              = 4
-	REFUSED             = 5
+	NOERROR ResultCode = iota
+	FORMERR
+	SERVFAIL
+	NXDOMAIN
+	NOTIMP
+	REFUSED
 )
 
 func (res ResultCode) From_num(num uint8) ResultCode {

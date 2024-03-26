@@ -9,11 +9,11 @@ import (
 )
 
 type DNSPacket struct {
-	Header      dnsHeader     `json:"header"`
 	Questions   []DNSQuestion `json:"questions"`
 	Answers     []DNSRecord   `json:"answers"`
 	Authorities []DNSRecord   `json:"authorities"`
 	Resources   []DNSRecord   `json:"resource"`
+	Header      dnsHeader     `json:"header"`
 }
 
 func NewPacket() DNSPacket {
@@ -58,7 +58,7 @@ func (d *DNSPacket) From_buffer(buffer *bpb.BytePacketBuffer) (*DNSPacket, error
 		if p_rec, err = eDnsRecord.Read(buffer); err != nil {
 			return nil, err
 		}
-		var rec = *p_rec
+		rec := *p_rec
 		d.Authorities = append(d.Authorities, rec)
 	}
 	for i := 0; i < int(d.Header.ResourceEntries); i++ {
@@ -67,7 +67,7 @@ func (d *DNSPacket) From_buffer(buffer *bpb.BytePacketBuffer) (*DNSPacket, error
 		if p_rec, err = eDnsRecord.Read(buffer); err != nil {
 			return nil, err
 		}
-		var rec = *p_rec
+		rec := *p_rec
 		d.Resources = append(d.Resources, rec)
 	}
 
@@ -77,7 +77,6 @@ func (d *DNSPacket) From_buffer(buffer *bpb.BytePacketBuffer) (*DNSPacket, error
 // ---------------------------------- For Writing ---------------------------------------------------
 
 func (d *DNSPacket) Write(buffer *bpb.BytePacketBuffer) error {
-
 	d.Header.Questions = uint16(len(d.Questions))
 	d.Header.Answers = uint16(len(d.Answers))
 	d.Header.AuthoritativeEntries = uint16(len(d.Authorities))
@@ -115,7 +114,6 @@ func (d *DNSPacket) Write(buffer *bpb.BytePacketBuffer) error {
 }
 
 func (d *DNSPacket) GetRandomA() (net.IP, error) {
-
 	var answers []DNSRecord
 
 	for _, a := range d.Answers {
@@ -131,7 +129,6 @@ func (d *DNSPacket) GetRandomA() (net.IP, error) {
 }
 
 func (d *DNSPacket) GetResolvedNS(qname string) (string, error) {
-
 	for _, a := range d.Authorities {
 		if a.NS.Host != "" {
 			for _, r := range d.Resources {
@@ -145,7 +142,6 @@ func (d *DNSPacket) GetResolvedNS(qname string) (string, error) {
 }
 
 func (d *DNSPacket) GetUnresNS(qname string) (string, error) {
-
 	authorities := map[string]string{}
 	for _, a := range d.Authorities {
 		if a.NS.Host != "" {
@@ -157,7 +153,6 @@ func (d *DNSPacket) GetUnresNS(qname string) (string, error) {
 		if _, ok := authorities[r.A.Domain]; !ok {
 			return r.A.Addr.String(), nil
 		}
-
 	}
 	return "", errors.New("no as of type NS")
 }

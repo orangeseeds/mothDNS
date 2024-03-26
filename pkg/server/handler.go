@@ -15,7 +15,7 @@ Handles the DNS question sent to the server.
 @param addr	    -> address of the request sender
 @param buf	    -> byte buffer received from the request
 */
-func HandleConnection(socket net.PacketConn, addr net.Addr, buf []byte) {
+func HandleConnection(socket net.PacketConn, addr net.Addr, buf []byte, rootServer string) {
 	// fmt.Printf("%v: \n", buf)
 	rcvBuffer := bpb.New()
 	rcvBuffer.Buf = buf
@@ -38,7 +38,7 @@ func HandleConnection(socket net.PacketConn, addr net.Addr, buf []byte) {
 	if len(rcvPacket.Questions) > 0 {
 		for _, q := range rcvPacket.Questions {
 
-			respPacket, err := RecrLookUp(q.Name, q.Qtype)
+			respPacket, err := RecrLookUp(q.Name, q.Qtype, rootServer)
 			if err != nil {
 				log.Println("Something went wrong during the lookup...")
 				replyPacket.Header.Rescode = core.SERVFAIL
