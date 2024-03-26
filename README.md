@@ -10,7 +10,7 @@ mothDNS is a basic recursive DNS server implementation that follows the conventi
 ```
 
 ## Snapshots
-![snapshot1](assets/screenshot.png)
-
+![snapshot2](assets/mothDNS-help.png)
+![snapshot1](assets/moth-dig.png)
 
 
